@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// SQLite (Prisma) ne supporte pas les enums natifs : les valeurs ci-dessous
+// sont stockées en String et gardées cohérentes via src/lib/constants.ts.
+// Role: "ADMIN" | "LIVREUR"
+// StatutCommande: "RECUE" | "CONFIRMEE" | "EN_PREPARATION" | "PRETE" | "EN_LIVRAISON" | "LIVREE" | "ANNULEE"
+// ModeLivraison: "LIVRAISON" | "RETRAIT"
+// MoyenPaiement: "WAVE" | "ORANGE_MONEY" | "A_LA_LIVRAISON" | "TEST"
+// StatutPaiement: "INITIE" | "EN_ATTENTE" | "CONFIRME" | "ECHOUE"
+// StatutLivraison: "EN_ATTENTE" | "ASSIGNEE" | "EN_ROUTE" | "LIVREE"
+
+// Compte interne (admin, livreur) — les clients ne créent pas de compte,
+// ils sont identifiés par leur numéro de téléphone.
+model Utilisateur {
+  id           String   @id @default(cuid())
+  nom          String
+  telephone    String   @unique
+  motDePasse   String
+  role         String
+  actif        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  livraisons   Livraison[]
+}
+
+model Client {
+  id             String    @id @default(cuid())
+  nom            String
+  telephone      String    @unique
+  adresse        String?
+  adressePrecision String?
+  createdAt      DateTime  @default(now())
+
+  commandes      Commande[]
+  fidelite       Fidelite?
+  avis           Avis[]
+  favoris        Favori[]
+  notifications  Notification[]
+}
+
+model Plat {
+  id           String   @id @default(cuid())
+  nom          String
+  description  String
+  photo        String?
+  prix         Int
+  categorie    String?
+  disponible   Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  details      DetailCommande[]
+  favoris      Favori[]
+}
+
+model Commande {
+  id                String          @id @default(cuid())
+  numero            Int             @unique
+  client            Client          @relation(fields: [clientId], references: [id])
+  clientId          String
+  total             Int
+  fraisLivraison    Int             @default(0)
+  statut            String          @default("RECUE")
+  modeLivraison     String
+  adresseLivraison  String?
+  precisionAdresse  String?
+  qrCode            String          @unique
+  codeSecours       String
+  codeSecoursUtilise Boolean        @default(false)
+  fideliteCreditee  Boolean         @default(false)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  details           DetailCommande[]
+  paiement          Paiement?
+  livraison         Livraison?
+  avis              Avis?
+}
+
+model DetailCommande {
+  id          String   @id @default(cuid())
+  commande    Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+  commandeId  String
+  plat        Plat     @relation(fields: [platId], references: [id])
+  platId      String
+  nomPlat     String
+  quantite    Int
+  prixUnitaire Int
+}
+
+model Paiement {
+  id          String         @id @default(cuid())
+  commande    Commande       @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+  commandeId  String         @unique
+  moyen       String
+  montant     Int
+  statut      String         @default("INITIE")
+  reference   String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model Livraison {
+  id            String          @id @default(cuid())
+  commande      Commande        @relation(fields: [commandeId], references: [id], onDelete: Cascade)
+  commandeId    String          @unique
+  livreur       Utilisateur?    @relation(fields: [livreurId], references: [id])
+  livreurId     String?
+  adresse       String?
+  statut        String          @default("EN_ATTENTE")
+  dateValidation DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+}
+
+model Fidelite {
+  id                  String   @id @default(cuid())
+  client              Client   @relation(fields: [clientId], references: [id])
+  clientId            String   @unique
+  credits             Int      @default(0)
+  recompensesDisponibles Int   @default(0)
+  updatedAt           DateTime @updatedAt
+}
+
+model Avis {
+  id          String   @id @default(cuid())
+  client      Client   @relation(fields: [clientId], references: [id])
+  clientId    String
+  commande    Commande @relation(fields: [commandeId], references: [id])
+  commandeId  String   @unique
+  note        Int
+  commentaire String?
+  masque      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+}
+
+model Favori {
+  id       String @id @default(cuid())
+  client   Client @relation(fields: [clientId], references: [id])
+  clientId String
+  plat     Plat   @relation(fields: [platId], references: [id])
+  platId   String
+
+  @@unique([clientId, platId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  client    Client   @relation(fields: [clientId], references: [id])
+  clientId  String
+  message   String
+  lu        Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
