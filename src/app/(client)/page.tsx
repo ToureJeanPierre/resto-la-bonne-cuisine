@@ -24,7 +24,7 @@ export default async function AccueilPage() {
       <div className="relative">
         <Image
           src="/images/banner.webp"
-          alt="La Bonne Cuisine"
+          alt="Restaurant Kalym"
           width={2000}
           height={620}
           className="h-40 w-full object-cover"
@@ -35,7 +35,7 @@ export default async function AccueilPage() {
       <div className="space-y-6 p-4">
         <div>
           <h1 className="font-display text-2xl font-bold">Bonjour 👋</h1>
-          <p className="text-ink/60">Le goût du bonheur, livré directement chez vous.</p>
+          <p className="text-ink/60">Le bon goût, notre passion — livré directement chez vous.</p>
         </div>
 
         {avisData._count > 0 && (

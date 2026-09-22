@@ -26,7 +26,7 @@ export default function AdminNav({ nom }: { nom: string }) {
     <header className="sticky top-0 z-30 border-b border-black/10 bg-white">
       <div className="flex items-center justify-between px-4 py-3">
         <div>
-          <p className="font-display text-lg font-bold">La Bonne Cuisine</p>
+          <p className="font-display text-lg font-bold">Restaurant Kalym</p>
           <p className="text-xs text-ink/50">Bonjour, {nom}</p>
         </div>
         <button onClick={deconnecter} className="text-sm font-semibold text-ink/50">

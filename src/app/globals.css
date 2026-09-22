@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 :root {
-  --gold: #d4a017;
+  --gold: #c9a227;
 }
 
 body {
   background: #faf8f4;
-  color: #171310;
+  color: #132c54;
 }
 
 .btn-primary {

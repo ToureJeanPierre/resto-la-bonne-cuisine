@@ -1,11 +1,11 @@
 {
-  "name": "La Bonne Cuisine",
-  "short_name": "La Bonne Cuisine",
-  "description": "Le goût du bonheur — commandez le menu du jour et faites-vous livrer.",
+  "name": "Restaurant Kalym",
+  "short_name": "Kalym",
+  "description": "Le bon goût, notre passion — commandez le menu du jour et faites-vous livrer.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf8f4",
-  "theme_color": "#171310",
+  "theme_color": "#132C54",
   "icons": [
     {
       "src": "/images/logo.webp",

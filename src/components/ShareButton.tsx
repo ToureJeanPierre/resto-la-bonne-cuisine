@@ -11,7 +11,7 @@ export default function ShareButton() {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: "La Bonne Cuisine", text: texte, url });
+        await navigator.share({ title: "Restaurant Kalym", text: texte, url });
         return;
       } catch {
         // annulé par l'utilisateur, on continue vers le fallback

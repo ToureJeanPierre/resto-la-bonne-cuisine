@@ -6,11 +6,11 @@ const config: Config = {
     extend: {
       colors: {
         gold: {
-          DEFAULT: "#D4A017",
-          light: "#E8C158",
+          DEFAULT: "#C9A227",
+          light: "#E0C161",
           dark: "#9C7710",
         },
-        ink: "#171310",
+        ink: "#132C54",
       },
       fontFamily: {
         display: ["Georgia", "serif"],
