@@ -10,8 +10,11 @@ Prototype fonctionnel construit selon le cahier des charges : PWA mobile-first
   handlers), conformément à l'architecture en 3 parties recommandée par le
   cahier des charges (client / admin / serveur+API), tout en restant un seul
   déploiement pour la phase 1.
-- **Prisma + SQLite** pour la base de données (facilement remplaçable par
-  PostgreSQL en production en changeant `DATABASE_URL` et le `provider`).
+- **Prisma + PostgreSQL** pour la base de données (nécessaire pour un
+  déploiement serverless comme Vercel, dont le système de fichiers n'est pas
+  persistant — SQLite n'y fonctionnerait pas). En local, tu peux pointer sur
+  une base Postgres gratuite (Neon, Supabase, Vercel Postgres) ou une instance
+  locale.
 - **Tailwind CSS** pour l'interface.
 - **jose** (JWT en cookie httpOnly) pour l'authentification admin/livreur.
 - **qrcode** (génération) et **html5-qrcode** (scan côté livreur) pour la
@@ -21,7 +24,7 @@ Prototype fonctionnel construit selon le cahier des charges : PWA mobile-first
 
 ```bash
 npm install
-cp .env.example .env
+cp .env.example .env   # renseigner un DATABASE_URL Postgres valide
 npx prisma db push
 npm run db:seed
 npm run dev
@@ -67,12 +70,31 @@ Réservation de table, GPS livreur, gestion poussée des stocks, commandes de
 groupe, promotions avancées, statistiques avancées — comme indiqué au
 cahier des charges (§59).
 
-## Passage en production
+## Déploiement (Vercel)
 
-1. Remplacer SQLite par PostgreSQL (`DATABASE_URL`) pour supporter la charge.
-2. Brancher les vrais comptes marchands dans `src/lib/payment.ts`
-   (`WaveProvider`, `OrangeMoneyProvider`) — clés API côté serveur uniquement,
-   jamais dans le client.
-3. Générer les icônes PWA aux formats/tailles requis et packager en
-   application Android (TWA) une fois la version web validée par de vrais
-   clients, comme recommandé dans le cahier des charges.
+1. Sur [vercel.com](https://vercel.com), « Add New Project » → importer le
+   dépôt GitHub `ToureJeanPierre/resto-la-bonne-cuisine`
+   (branche `claude/new-session-kiu4sn`, qui est la branche par défaut).
+2. Ajouter une base de données : onglet **Storage** du projet Vercel →
+   **Create Database** → Postgres (ou brancher un Neon/Supabase existant).
+   Vercel ajoute automatiquement la variable `DATABASE_URL`.
+3. Ajouter la variable d'environnement `JWT_SECRET` (une chaîne aléatoire
+   longue) dans **Settings → Environment Variables**.
+4. Avant le premier déploiement (ou juste après), exécuter une fois, en
+   local, avec le `DATABASE_URL` de production dans `.env` :
+   ```bash
+   npx prisma db push
+   npm run db:seed
+   ```
+5. Déployer. L'URL Vercel fournie (`https://....vercel.app`) est le lien à
+   partager par WhatsApp, comme recommandé dans le cahier des charges.
+
+**Ensuite** :
+
+- Changer le mot de passe admin/livreur créés par le seed dès le premier accès.
+- Brancher les vrais comptes marchands dans `src/lib/payment.ts`
+  (`WaveProvider`, `OrangeMoneyProvider`) — clés API côté serveur uniquement,
+  jamais dans le client.
+- Générer les icônes PWA aux formats/tailles requis et packager en
+  application Android (TWA) une fois la version web validée par de vrais
+  clients, comme recommandé dans le cahier des charges.

@@ -3,12 +3,13 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// SQLite (Prisma) ne supporte pas les enums natifs : les valeurs ci-dessous
-// sont stockées en String et gardées cohérentes via src/lib/constants.ts.
+// Ces champs sont stockés en String (plutôt qu'en enum Prisma) et gardés
+// cohérents via src/lib/constants.ts, pour rester compatibles avec SQLite
+// en développement local.
 // Role: "ADMIN" | "LIVREUR"
 // StatutCommande: "RECUE" | "CONFIRMEE" | "EN_PREPARATION" | "PRETE" | "EN_LIVRAISON" | "LIVREE" | "ANNULEE"
 // ModeLivraison: "LIVRAISON" | "RETRAIT"
