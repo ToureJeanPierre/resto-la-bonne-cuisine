@@ -9,8 +9,6 @@ import { notifier } from "@/lib/fidelite";
 
 type PanierItem = { platId: string; quantite: number };
 
-const FRAIS_LIVRAISON = 500;
-
 export async function POST(req: NextRequest) {
   const body = await req.json();
   const {
@@ -61,7 +59,6 @@ export async function POST(req: NextRequest) {
     const plat = plats.find((p) => p.id === item.platId)!;
     return sum + plat.prix * item.quantite;
   }, 0);
-  const fraisLivraison = modeLivraison === "LIVRAISON" ? FRAIS_LIVRAISON : 0;
 
   const client = await prisma.client.upsert({
     where: { telephone },
@@ -86,7 +83,11 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const total = Math.max(0, sousTotal + fraisLivraison - remisePlatOffert);
+  // Pas de frais de livraison automatique : la restauratrice les fixe
+  // elle-même au cas par cas (jour, distance, client) depuis l'admin.
+  // Le retrait n'a jamais de frais, donc rien à confirmer dans ce cas.
+  const fraisLivraisonConfirme = modeLivraison === "RETRAIT";
+  const total = Math.max(0, sousTotal - remisePlatOffert);
 
   const dernierNumero = await prisma.commande.findFirst({
     orderBy: { numero: "desc" },
@@ -99,7 +100,9 @@ export async function POST(req: NextRequest) {
       numero,
       clientId: client.id,
       total,
-      fraisLivraison,
+      fraisLivraison: 0,
+      fraisLivraisonConfirme,
+      remiseFidelite: remisePlatOffert,
       modeLivraison,
       adresseLivraison: adresseLivraison ?? null,
       precisionAdresse: precisionAdresse ?? null,

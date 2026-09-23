@@ -4,8 +4,6 @@ import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 import { formatFCFA } from "@/lib/format";
 
-const FRAIS_LIVRAISON = 500;
-
 export default function PanierPage() {
   const { items, changerQuantite, retirer, sousTotal } = useCart();
 
@@ -69,11 +67,11 @@ export default function PanierPage() {
         </div>
         <div className="flex justify-between text-ink/70">
           <span>Livraison (si applicable)</span>
-          <span>{formatFCFA(FRAIS_LIVRAISON)}</span>
+          <span className="text-sm italic">à confirmer</span>
         </div>
         <div className="flex justify-between border-t border-black/10 pt-2 text-lg font-bold">
           <span>TOTAL</span>
-          <span>{formatFCFA(sousTotal + FRAIS_LIVRAISON)}</span>
+          <span>{formatFCFA(sousTotal)}</span>
         </div>
       </div>
 

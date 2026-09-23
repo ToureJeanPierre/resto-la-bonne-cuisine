@@ -8,6 +8,7 @@ const LIENS = [
   { href: "/admin/menu", label: "Menu du jour", icone: "🍽️" },
   { href: "/admin/commandes", label: "Commandes", icone: "📋" },
   { href: "/admin/livraisons", label: "Livraisons", icone: "🚚" },
+  { href: "/admin/livreurs", label: "Livreurs", icone: "🏍️" },
   { href: "/admin/clients", label: "Clients", icone: "👥" },
   { href: "/admin/avis", label: "Avis", icone: "⭐" },
   { href: "/admin/parametres", label: "Paramètres", icone: "⚙️" },

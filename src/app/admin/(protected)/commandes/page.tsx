@@ -10,6 +10,8 @@ type Commande = {
   total: number;
   statut: StatutCommande;
   modeLivraison: string;
+  fraisLivraison: number;
+  fraisLivraisonConfirme: boolean;
   createdAt: string;
   client: { nom: string; telephone: string };
   details: { nomPlat: string; quantite: number }[];
@@ -55,6 +57,15 @@ export default function AdminCommandesPage() {
     charger();
   }
 
+  async function definirFraisLivraison(id: string, fraisLivraison: number) {
+    await fetch(`/api/commandes/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fraisLivraison }),
+    });
+    charger();
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold">Commandes</h1>
@@ -90,6 +101,13 @@ export default function AdminCommandesPage() {
             <p className="text-sm text-ink/60">
               {c.details.map((d) => `${d.nomPlat} ×${d.quantite}`).join(", ")}
             </p>
+            {c.modeLivraison === "LIVRAISON" && (
+              <FraisLivraison
+                valeurActuelle={c.fraisLivraison}
+                confirme={c.fraisLivraisonConfirme}
+                onValider={(montant) => definirFraisLivraison(c.id, montant)}
+              />
+            )}
             <div className="flex items-center justify-between">
               <span className="text-xs text-ink/50">
                 {c.modeLivraison === "LIVRAISON" ? "Livraison" : "Retrait"}
@@ -112,6 +130,58 @@ export default function AdminCommandesPage() {
           <p className="text-center text-ink/60">Aucune commande.</p>
         )}
       </div>
+    </div>
+  );
+}
+
+function FraisLivraison({
+  valeurActuelle,
+  confirme,
+  onValider,
+}: {
+  valeurActuelle: number;
+  confirme: boolean;
+  onValider: (montant: number) => void;
+}) {
+  const [edition, setEdition] = useState(false);
+  const [montant, setMontant] = useState(String(valeurActuelle || ""));
+
+  if (!edition) {
+    return (
+      <button
+        onClick={() => setEdition(true)}
+        className={`flex items-center gap-1 text-xs font-semibold ${
+          confirme ? "text-ink/60" : "text-gold-dark"
+        }`}
+      >
+        🚚 Livraison :{" "}
+        {confirme ? `${formatFCFA(valeurActuelle)}` : "à confirmer — cliquer pour fixer"}
+      </button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 rounded-lg bg-black/5 p-2">
+      <input
+        type="number"
+        value={montant}
+        onChange={(e) => setMontant(e.target.value)}
+        placeholder="Montant en F"
+        className="w-24 rounded border border-black/10 px-2 py-1 text-sm"
+        autoFocus
+      />
+      <button
+        onClick={() => {
+          onValider(Number(montant) || 0);
+          setEdition(false);
+        }}
+        className="text-xs font-semibold text-green-700"
+      >
+        Valider
+      </button>
+      <button onClick={() => setEdition(false)} className="text-xs text-ink/50">
+        Annuler
+      </button>
     </div>
   );
 }

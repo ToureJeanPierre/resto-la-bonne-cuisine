@@ -6,8 +6,6 @@ import { useCart } from "@/lib/cart-context";
 import { formatFCFA } from "@/lib/format";
 import { MOYENS_PAIEMENT, LABELS_MOYEN_PAIEMENT } from "@/lib/constants";
 
-const FRAIS_LIVRAISON = 500;
-
 export default function CheckoutPage() {
   const { items, sousTotal, vider } = useCart();
   const router = useRouter();
@@ -30,9 +28,8 @@ export default function CheckoutPage() {
       .catch(() => {});
   }, []);
 
-  const fraisLivraison = modeLivraison === "LIVRAISON" ? FRAIS_LIVRAISON : 0;
   const remise = utiliserRecompense && recompensesDisponibles > 0 ? Math.min(...items.map((i) => i.prix)) : 0;
-  const total = Math.max(0, sousTotal + fraisLivraison - remise);
+  const total = Math.max(0, sousTotal - remise);
 
   if (items.length === 0) {
     return <p className="p-8 text-center text-ink/60">Votre panier est vide.</p>;
@@ -181,10 +178,12 @@ export default function CheckoutPage() {
           <span>Sous-total</span>
           <span>{formatFCFA(sousTotal)}</span>
         </div>
-        <div className="flex justify-between text-ink/70">
-          <span>Livraison</span>
-          <span>{formatFCFA(fraisLivraison)}</span>
-        </div>
+        {modeLivraison === "LIVRAISON" && (
+          <div className="flex justify-between text-ink/70">
+            <span>Livraison</span>
+            <span className="text-sm italic">à confirmer avec la restauratrice</span>
+          </div>
+        )}
         {remise > 0 && (
           <div className="flex justify-between text-green-700">
             <span>Récompense fidélité</span>
@@ -195,6 +194,12 @@ export default function CheckoutPage() {
           <span>TOTAL</span>
           <span>{formatFCFA(total)}</span>
         </div>
+        {modeLivraison === "LIVRAISON" && (
+          <p className="text-xs text-ink/50">
+            Les frais de livraison seront confirmés par la restauratrice après réception de
+            votre commande et ajoutés au total.
+          </p>
+        )}
       </div>
 
       {erreur && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{erreur}</p>}

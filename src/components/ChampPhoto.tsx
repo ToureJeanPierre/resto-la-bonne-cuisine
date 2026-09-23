@@ -61,7 +61,6 @@ export default function ChampPhoto({
           ref={inputRef}
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={choisirFichier}
           className="hidden"
         />

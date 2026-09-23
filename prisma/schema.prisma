@@ -68,6 +68,8 @@ model Commande {
   clientId          String
   total             Int
   fraisLivraison    Int             @default(0)
+  fraisLivraisonConfirme Boolean    @default(false)
+  remiseFidelite    Int             @default(0)
   statut            String          @default("RECUE")
   modeLivraison     String
   adresseLivraison  String?

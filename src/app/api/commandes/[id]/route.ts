@@ -29,39 +29,73 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   return NextResponse.json(commande);
 }
 
+const VALID_STATUTS = [
+  "RECUE",
+  "CONFIRMEE",
+  "EN_PREPARATION",
+  "PRETE",
+  "EN_LIVRAISON",
+  "LIVREE",
+  "ANNULEE",
+];
+
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const guard = await requireRole("ADMIN");
   if ("error" in guard) return guard.error;
 
-  const { statut } = await req.json();
-  const validStatuts = [
-    "RECUE",
-    "CONFIRMEE",
-    "EN_PREPARATION",
-    "PRETE",
-    "EN_LIVRAISON",
-    "LIVREE",
-    "ANNULEE",
-  ];
-  if (!validStatuts.includes(statut)) {
-    return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
-  }
+  const { statut, fraisLivraison } = await req.json();
 
-  const commande = await prisma.commande.update({
-    where: { id: params.id },
-    data: { statut },
-  });
+  if (statut !== undefined) {
+    if (!VALID_STATUTS.includes(statut)) {
+      return NextResponse.json({ error: "Statut invalide" }, { status: 400 });
+    }
 
-  if (statut === "EN_LIVRAISON") {
-    await prisma.livraison.updateMany({
-      where: { commandeId: commande.id },
-      data: { statut: "EN_ROUTE" },
+    const commande = await prisma.commande.update({
+      where: { id: params.id },
+      data: { statut },
     });
+
+    if (statut === "EN_LIVRAISON") {
+      await prisma.livraison.updateMany({
+        where: { commandeId: commande.id },
+        data: { statut: "EN_ROUTE" },
+      });
+    }
+
+    if (MESSAGES[statut]) {
+      await notifier(commande.clientId, `Commande #${commande.numero} — ${MESSAGES[statut]}`);
+    }
+
+    return NextResponse.json(commande);
   }
 
-  if (MESSAGES[statut]) {
-    await notifier(commande.clientId, `Commande #${commande.numero} — ${MESSAGES[statut]}`);
+  if (fraisLivraison !== undefined) {
+    const montant = Number(fraisLivraison);
+    if (!Number.isFinite(montant) || montant < 0) {
+      return NextResponse.json({ error: "Montant invalide" }, { status: 400 });
+    }
+
+    const existante = await prisma.commande.findUnique({
+      where: { id: params.id },
+      include: { details: true },
+    });
+    if (!existante) return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
+
+    const sousTotal = existante.details.reduce((s, d) => s + d.prixUnitaire * d.quantite, 0);
+    const total = Math.max(0, sousTotal + montant - existante.remiseFidelite);
+
+    const commande = await prisma.commande.update({
+      where: { id: params.id },
+      data: { fraisLivraison: montant, fraisLivraisonConfirme: true, total },
+    });
+
+    await notifier(
+      commande.clientId,
+      `Commande #${commande.numero} — frais de livraison confirmés : ${montant} F. Nouveau total : ${total} F.`
+    );
+
+    return NextResponse.json(commande);
   }
 
-  return NextResponse.json(commande);
+  return NextResponse.json({ error: "Aucune modification fournie" }, { status: 400 });
 }
