@@ -29,11 +29,6 @@ async function main() {
     update: {},
   });
 
-  // Anciens plats de démonstration remplacés par le vrai menu ci-dessous.
-  await prisma.plat.deleteMany({
-    where: { nom: { in: ["Poulet braisé", "Poisson braisé", "Riz au poulet"] } },
-  });
-
   const plats = [
     {
       nom: "Riz à la sauce gombo",
@@ -107,13 +102,13 @@ async function main() {
     },
   ];
 
-  for (const plat of plats) {
-    const existant = await prisma.plat.findFirst({ where: { nom: plat.nom } });
-    if (existant) {
-      await prisma.plat.update({ where: { id: existant.id }, data: plat });
-    } else {
-      await prisma.plat.create({ data: plat });
-    }
+  // Ce menu ne sert qu'à démarrer une base vide (premier déploiement).
+  // Dès qu'au moins un plat existe, on ne touche plus jamais à la table :
+  // toute modification faite par la restauratrice (nom, prix, photo,
+  // suppression, ajout) doit rester définitive d'un déploiement à l'autre.
+  const nombrePlatsExistants = await prisma.plat.count();
+  if (nombrePlatsExistants === 0) {
+    await prisma.plat.createMany({ data: plats });
   }
 
   // Créé une seule fois : on ne doit jamais écraser les valeurs que la
