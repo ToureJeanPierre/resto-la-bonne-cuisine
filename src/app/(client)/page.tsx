@@ -1,16 +1,17 @@
 import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import PlatCard from "@/components/PlatCard";
+import SpecialiteCard from "@/components/SpecialiteCard";
 import ShareButton from "@/components/ShareButton";
+import Footer from "@/components/Footer";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccueilPage() {
-  const plats = await prisma.plat.findMany({
+  const specialites = await prisma.plat.findMany({
     where: { disponible: true },
     orderBy: { createdAt: "asc" },
-    take: 6,
+    take: 4,
   });
 
   const avisData = await prisma.avis.aggregate({
@@ -35,8 +36,16 @@ export default async function AccueilPage() {
       <div className="space-y-6 p-4">
         <div>
           <h1 className="font-display text-2xl font-bold">Bonjour 👋</h1>
-          <p className="text-ink/60">Le bon goût, notre passion — livré directement chez vous.</p>
+          <p className="mt-1 text-ink/70">
+            Restaurant Kalym vous propose une cuisine généreuse et authentique,
+            préparée avec des produits frais chaque jour. Commandez votre plat
+            préféré, on s&apos;occupe de vous livrer.
+          </p>
         </div>
+
+        <Link href="/menu" className="btn-primary w-full">
+          Voir le menu du jour
+        </Link>
 
         {avisData._count > 0 && (
           <Link
@@ -51,32 +60,25 @@ export default async function AccueilPage() {
         )}
 
         <div>
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-lg font-bold">Le menu du jour</h2>
-            <Link href="/menu" className="text-sm font-semibold text-gold-dark">
-              Voir tout
-            </Link>
-          </div>
+          <h2 className="mb-2 text-lg font-bold">Nos spécialités</h2>
 
-          {plats.length === 0 ? (
+          {specialites.length === 0 ? (
             <p className="rounded-xl bg-white p-4 text-center text-ink/60 shadow-sm">
               Le menu du jour n&apos;a pas encore été publié. Revenez bientôt !
             </p>
           ) : (
-            <div className="space-y-3">
-              {plats.map((plat) => (
-                <PlatCard key={plat.id} plat={plat} />
+            <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+              {specialites.map((plat) => (
+                <SpecialiteCard key={plat.id} plat={plat} />
               ))}
             </div>
           )}
         </div>
 
-        <Link href="/menu" className="btn-primary w-full">
-          Commander
-        </Link>
-
         <ShareButton />
       </div>
+
+      <Footer />
     </div>
   );
 }
