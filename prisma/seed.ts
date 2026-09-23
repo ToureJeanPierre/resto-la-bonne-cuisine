@@ -116,6 +116,19 @@ async function main() {
     }
   }
 
+  // Créé une seule fois : on ne doit jamais écraser les valeurs que la
+  // restauratrice aurait déjà modifiées depuis l'administration.
+  await prisma.parametres.upsert({
+    where: { id: "site" },
+    create: {
+      id: "site",
+      adresse: "Adresse à préciser, Abidjan",
+      telephone: "+225 00 00 00 00",
+      horaires: "Tous les jours, 9h — 22h",
+    },
+    update: {},
+  });
+
   console.log("Seed terminé.");
   console.log("Admin: 0700000001 / admin1234");
   console.log("Livreur: 0700000002 / livreur1234");

@@ -10,6 +10,7 @@ const LIENS = [
   { href: "/admin/livraisons", label: "Livraisons", icone: "🚚" },
   { href: "/admin/clients", label: "Clients", icone: "👥" },
   { href: "/admin/avis", label: "Avis", icone: "⭐" },
+  { href: "/admin/parametres", label: "Paramètres", icone: "⚙️" },
 ];
 
 export default function AdminNav({ nom }: { nom: string }) {

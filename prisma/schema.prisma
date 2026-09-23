@@ -160,3 +160,13 @@ model Notification {
   lu        Boolean  @default(false)
   createdAt DateTime @default(now())
 }
+
+// Ligne unique (id fixe "site") : coordonnées du restaurant affichées en
+// pied de page, modifiables par la restauratrice depuis l'administration.
+model Parametres {
+  id        String   @id @default("site")
+  adresse   String
+  telephone String
+  horaires  String
+  updatedAt DateTime @updatedAt
+}

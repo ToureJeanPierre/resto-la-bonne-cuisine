@@ -1,10 +1,15 @@
-// TODO: remplacer ces informations par les vraies coordonnées du restaurant.
-const ADRESSE = "Adresse à préciser, Abidjan";
-const TELEPHONE = "+225 00 00 00 00";
-const HORAIRES = "Tous les jours, 9h — 22h";
+import { prisma } from "@/lib/prisma";
 
-export default function Footer() {
-  const telephoneLien = TELEPHONE.replace(/[^+\d]/g, "");
+const VALEURS_PAR_DEFAUT = {
+  adresse: "Adresse à préciser, Abidjan",
+  telephone: "+225 00 00 00 00",
+  horaires: "Tous les jours, 9h — 22h",
+};
+
+export default async function Footer() {
+  const parametres = await prisma.parametres.findUnique({ where: { id: "site" } });
+  const { adresse, telephone, horaires } = parametres ?? VALEURS_PAR_DEFAUT;
+  const telephoneLien = telephone.replace(/[^+\d]/g, "");
 
   return (
     <footer className="mt-8 space-y-4 border-t border-black/10 bg-ink px-4 py-6 text-white">
@@ -14,11 +19,11 @@ export default function Footer() {
       </div>
 
       <div className="space-y-2 text-sm text-white/80">
-        <p>📍 {ADRESSE}</p>
+        <p>📍 {adresse}</p>
         <a href={`tel:${telephoneLien}`} className="block hover:text-gold-light">
-          📞 {TELEPHONE}
+          📞 {telephone}
         </a>
-        <p>🕒 {HORAIRES}</p>
+        <p>🕒 {horaires}</p>
       </div>
 
       <p className="border-t border-white/10 pt-4 text-xs text-white/40">
