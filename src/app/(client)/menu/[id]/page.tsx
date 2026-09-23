@@ -4,7 +4,7 @@ import { notFound } from "next/navigation";
 import AjouterAuPanier from "@/components/AjouterAuPanier";
 import FavoriButton from "@/components/FavoriButton";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function FichePlatPage({ params }: { params: { id: string } }) {
   const plat = await prisma.plat.findUnique({ where: { id: params.id } });

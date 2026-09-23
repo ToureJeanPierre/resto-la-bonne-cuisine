@@ -12,13 +12,21 @@ export default function TopBar() {
   const [nonLues, setNonLues] = useState(0);
 
   useEffect(() => {
-    fetch("/api/notifications")
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) setNonLues(data.filter((n) => !n.lu).length);
-      })
-      .catch(() => {});
-  }, [pathname]);
+    function charger() {
+      fetch("/api/notifications")
+        .then((r) => r.json())
+        .then((data) => {
+          if (Array.isArray(data)) setNonLues(data.filter((n) => !n.lu).length);
+        })
+        .catch(() => {});
+    }
+    // Un seul chargement au montage puis un rafraîchissement périodique,
+    // plutôt qu'un aller-retour réseau à chaque navigation (coûteux pour
+    // les visiteurs loin du serveur).
+    charger();
+    const intervalle = setInterval(charger, 30000);
+    return () => clearInterval(intervalle);
+  }, []);
 
   if (pathname.startsWith("/admin") || pathname.startsWith("/livreur")) return null;
 

@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import PlatCard from "@/components/PlatCard";
 
-export const dynamic = "force-dynamic";
+// Le menu change rarement seconde par seconde : on le met en cache et on
+// l'invalide explicitement (revalidatePath) dès qu'un plat est modifié,
+// plutôt que de refaire une requête à la base à chaque visite — ce qui
+// compte beaucoup pour les visiteurs loin du serveur.
+export const revalidate = 60;
 
 export default async function MenuPage() {
   const plats = await prisma.plat.findMany({ orderBy: { createdAt: "asc" } });

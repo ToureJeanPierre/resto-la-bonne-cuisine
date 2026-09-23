@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { getClientCookie } from "@/lib/auth";
 import { requireRole } from "@/lib/guards";
@@ -63,6 +64,9 @@ export async function POST(req: NextRequest) {
       commentaire: commentaire ?? null,
     },
   });
+
+  revalidatePath("/avis");
+  revalidatePath("/");
 
   return NextResponse.json(avis, { status: 201 });
 }

@@ -3,22 +3,26 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import SpecialiteCard from "@/components/SpecialiteCard";
 import ShareButton from "@/components/ShareButton";
-import Footer from "@/components/Footer";
+import Footer, { PARAMETRES_PAR_DEFAUT } from "@/components/Footer";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 30;
 
 export default async function AccueilPage() {
-  const specialites = await prisma.plat.findMany({
-    where: { disponible: true },
-    orderBy: { createdAt: "asc" },
-    take: 4,
-  });
-
-  const avisData = await prisma.avis.aggregate({
-    where: { masque: false },
-    _avg: { note: true },
-    _count: true,
-  });
+  // Les trois requêtes sont indépendantes : on les lance en parallèle
+  // plutôt qu'en série pour ne payer la latence réseau qu'une seule fois.
+  const [specialites, avisData, parametres] = await Promise.all([
+    prisma.plat.findMany({
+      where: { disponible: true },
+      orderBy: { createdAt: "asc" },
+      take: 4,
+    }),
+    prisma.avis.aggregate({
+      where: { masque: false },
+      _avg: { note: true },
+      _count: true,
+    }),
+    prisma.parametres.findUnique({ where: { id: "site" } }),
+  ]);
 
   return (
     <div>
@@ -78,7 +82,7 @@ export default async function AccueilPage() {
         <ShareButton />
       </div>
 
-      <Footer />
+      <Footer parametres={parametres ?? PARAMETRES_PAR_DEFAUT} />
     </div>
   );
 }

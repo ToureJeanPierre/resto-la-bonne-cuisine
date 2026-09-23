@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/guards";
 
@@ -27,6 +28,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     },
   });
 
+  revalidatePath("/menu");
+  revalidatePath(`/menu/${params.id}`);
+  revalidatePath("/");
+
   return NextResponse.json(plat);
 }
 
@@ -35,5 +40,9 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
   if ("error" in guard) return guard.error;
 
   await prisma.plat.delete({ where: { id: params.id } });
+
+  revalidatePath("/menu");
+  revalidatePath("/");
+
   return NextResponse.json({ ok: true });
 }

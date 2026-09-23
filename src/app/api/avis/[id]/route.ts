@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/guards";
 
@@ -11,6 +12,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     where: { id: params.id },
     data: { masque: Boolean(masque) },
   });
+
+  revalidatePath("/avis");
+  revalidatePath("/");
 
   return NextResponse.json(avis);
 }

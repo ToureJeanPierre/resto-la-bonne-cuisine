@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/guards";
 
@@ -34,6 +35,8 @@ export async function PATCH(req: NextRequest) {
       ...(horaires !== undefined && { horaires }),
     },
   });
+
+  revalidatePath("/");
 
   return NextResponse.json(parametres);
 }

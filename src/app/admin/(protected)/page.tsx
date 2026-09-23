@@ -8,9 +8,14 @@ export default async function AdminDashboardPage() {
   const debutJour = new Date();
   debutJour.setHours(0, 0, 0, 0);
 
-  const commandesDuJour = await prisma.commande.findMany({
-    where: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" } },
-  });
+  const [commandesDuJour, detailsDuJour] = await Promise.all([
+    prisma.commande.findMany({
+      where: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" } },
+    }),
+    prisma.detailCommande.findMany({
+      where: { commande: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" } } },
+    }),
+  ]);
 
   const enPreparation = commandesDuJour.filter((c) => c.statut === "EN_PREPARATION").length;
   const enLivraison = commandesDuJour.filter((c) => c.statut === "EN_LIVRAISON").length;
@@ -19,9 +24,6 @@ export default async function AdminDashboardPage() {
     .filter((c) => c.statut === "LIVREE")
     .reduce((sum, c) => sum + c.total, 0);
 
-  const detailsDuJour = await prisma.detailCommande.findMany({
-    where: { commande: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" } } },
-  });
   const regroupement = new Map<string, number>();
   for (const d of detailsDuJour) {
     regroupement.set(d.nomPlat, (regroupement.get(d.nomPlat) ?? 0) + d.quantite);

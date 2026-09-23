@@ -1,14 +1,15 @@
-import { prisma } from "@/lib/prisma";
-
-const VALEURS_PAR_DEFAUT = {
+export const PARAMETRES_PAR_DEFAUT = {
   adresse: "Adresse à préciser, Abidjan",
   telephone: "+225 00 00 00 00",
   horaires: "Tous les jours, 9h — 22h",
 };
 
-export default async function Footer() {
-  const parametres = await prisma.parametres.findUnique({ where: { id: "site" } });
-  const { adresse, telephone, horaires } = parametres ?? VALEURS_PAR_DEFAUT;
+export default function Footer({
+  parametres,
+}: {
+  parametres: { adresse: string; telephone: string; horaires: string };
+}) {
+  const { adresse, telephone, horaires } = parametres;
   const telephoneLien = telephone.replace(/[^+\d]/g, "");
 
   return (
