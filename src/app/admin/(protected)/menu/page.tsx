@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { formatFCFA } from "@/lib/format";
 import type { Plat } from "@/components/PlatCard";
+import ChampPhoto from "@/components/ChampPhoto";
 
 const PLAT_VIDE = { nom: "", description: "", prix: "", categorie: "", photo: "" };
 
@@ -133,7 +134,7 @@ export default function AdminMenuPage() {
               {enEdition ? "Modifier le plat" : "Ajouter un plat"}
             </h2>
             <div className="space-y-3">
-              <Champ label="Photo (URL)" value={form.photo} onChange={(v) => setForm({ ...form, photo: v })} />
+              <ChampPhoto valeur={form.photo} onChange={(v) => setForm({ ...form, photo: v })} />
               <Champ label="Nom" value={form.nom} onChange={(v) => setForm({ ...form, nom: v })} />
               <label className="block">
                 <span className="text-sm font-medium text-ink/70">Description</span>
