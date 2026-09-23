@@ -4,8 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { getClientCookie } from "@/lib/auth";
 import { formatFCFA } from "@/lib/format";
 import {
-  STATUTS_COMMANDE,
-  LABELS_STATUT_COMMANDE,
   StatutCommande,
   LABELS_MOYEN_PAIEMENT,
   MoyenPaiementType,
@@ -14,8 +12,6 @@ import AnnulerCommande from "@/components/AnnulerCommande";
 import AvisForm from "@/components/AvisForm";
 
 export const dynamic = "force-dynamic";
-
-const ETAPES: StatutCommande[] = STATUTS_COMMANDE.filter((s) => s !== "ANNULEE");
 
 export default async function CommandeDetailPage({ params }: { params: { id: string } }) {
   const commande = await prisma.commande.findUnique({
@@ -35,7 +31,6 @@ export default async function CommandeDetailPage({ params }: { params: { id: str
       : null;
 
   const statut = commande.statut as StatutCommande;
-  const indexActuel = ETAPES.indexOf(statut);
 
   return (
     <div className="space-y-5 p-4">
@@ -48,22 +43,18 @@ export default async function CommandeDetailPage({ params }: { params: { id: str
 
       {statut === "ANNULEE" ? (
         <div className="card p-4 text-center text-red-700">❌ Commande annulée</div>
+      ) : statut === "LIVREE" ? (
+        <div className="card p-4 text-center text-green-700">
+          ✅ Commande livrée. Bon appétit !
+        </div>
       ) : (
-        <div className="card space-y-3 p-4">
-          <p className="font-semibold">Suivi de la commande</p>
-          <ol className="space-y-2">
-            {ETAPES.map((etape, i) => (
-              <li
-                key={etape}
-                className={`flex items-center gap-2 text-sm ${
-                  i <= indexActuel ? "text-ink" : "text-ink/30"
-                }`}
-              >
-                <span>{i < indexActuel ? "✅" : i === indexActuel ? "🟠" : "○"}</span>
-                {LABELS_STATUT_COMMANDE[etape]}
-              </li>
-            ))}
-          </ol>
+        <div className="card p-4 text-center">
+          <p className="font-semibold text-green-700">✅ Commande enregistrée avec succès</p>
+          <p className="mt-1 text-sm text-ink/60">
+            {commande.modeLivraison === "LIVRAISON"
+              ? "Elle sera livrée sous peu."
+              : "Elle sera prête à récupérer sous peu."}
+          </p>
         </div>
       )}
 

@@ -4,11 +4,10 @@ import { requireRole } from "@/lib/guards";
 import { getClientCookie } from "@/lib/auth";
 import { notifier } from "@/lib/fidelite";
 
+// Le client ne voit qu'un suivi simplifié : pas de notification pour
+// chaque étape interne (confirmée, en préparation, prête, en livraison),
+// seulement la livraison et l'annulation.
 const MESSAGES: Record<string, string> = {
-  CONFIRMEE: "Votre commande a été confirmée.",
-  EN_PREPARATION: "Votre commande est en cours de préparation.",
-  PRETE: "Votre commande est prête.",
-  EN_LIVRAISON: "Votre commande est en livraison.",
   LIVREE: "Votre commande a été livrée. Bon appétit !",
   ANNULEE: "Votre commande a été annulée.",
 };

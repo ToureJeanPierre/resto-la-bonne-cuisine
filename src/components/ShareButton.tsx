@@ -29,7 +29,7 @@ export default function ShareButton() {
 
   return (
     <button onClick={partager} className="btn-secondary w-full">
-      📲 {copie ? "Lien copié !" : "Partager l'application"}
+      📲 {copie ? "Lien copié !" : "Partager le lien"}
     </button>
   );
 }

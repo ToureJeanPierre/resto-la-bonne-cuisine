@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getClientCookie } from "@/lib/auth";
 import { formatFCFA } from "@/lib/format";
-import { LABELS_STATUT_COMMANDE, ICONES_STATUT_COMMANDE, StatutCommande } from "@/lib/constants";
+import { statutClientSimplifie, StatutCommande } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -36,24 +36,26 @@ export default async function MesCommandesPage() {
       )}
 
       <div className="space-y-3">
-        {commandes.map((commande) => (
-          <Link
-            key={commande.id}
-            href={`/commandes/${commande.id}`}
-            className="card flex items-center justify-between p-4"
-          >
-            <div>
-              <p className="font-semibold">Commande #{commande.numero}</p>
-              <p className="text-sm text-ink/60">
-                {commande.details.length} article(s) — {formatFCFA(commande.total)}
-              </p>
-            </div>
-            <span className="badge bg-gold/10 text-gold-dark">
-              {ICONES_STATUT_COMMANDE[commande.statut as StatutCommande]}{" "}
-              {LABELS_STATUT_COMMANDE[commande.statut as StatutCommande]}
-            </span>
-          </Link>
-        ))}
+        {commandes.map((commande) => {
+          const { icone, label } = statutClientSimplifie(commande.statut as StatutCommande);
+          return (
+            <Link
+              key={commande.id}
+              href={`/commandes/${commande.id}`}
+              className="card flex items-center justify-between p-4"
+            >
+              <div>
+                <p className="font-semibold">Commande #{commande.numero}</p>
+                <p className="text-sm text-ink/60">
+                  {commande.details.length} article(s) — {formatFCFA(commande.total)}
+                </p>
+              </div>
+              <span className="badge bg-gold/10 text-gold-dark">
+                {icone} {label}
+              </span>
+            </Link>
+          );
+        })}
       </div>
     </div>
   );

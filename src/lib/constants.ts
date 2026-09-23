@@ -29,6 +29,14 @@ export const ICONES_STATUT_COMMANDE: Record<StatutCommande, string> = {
   ANNULEE: "❌",
 };
 
+// Statut simplifié montré au client : on ne détaille pas confirmée/en
+// préparation/prête/en livraison, uniquement en cours, livrée ou annulée.
+export function statutClientSimplifie(statut: StatutCommande): { icone: string; label: string } {
+  if (statut === "ANNULEE") return { icone: "❌", label: "Annulée" };
+  if (statut === "LIVREE") return { icone: "✅", label: "Livrée" };
+  return { icone: "🟡", label: "En cours" };
+}
+
 export const MOYENS_PAIEMENT = ["WAVE", "ORANGE_MONEY", "A_LA_LIVRAISON", "TEST"] as const;
 export type MoyenPaiementType = (typeof MOYENS_PAIEMENT)[number];
 
