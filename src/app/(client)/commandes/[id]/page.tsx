@@ -14,10 +14,13 @@ import AvisForm from "@/components/AvisForm";
 export const dynamic = "force-dynamic";
 
 export default async function CommandeDetailPage({ params }: { params: { id: string } }) {
-  const commande = await prisma.commande.findUnique({
-    where: { id: params.id },
-    include: { details: true, paiement: true, livraison: true, avis: true, client: true },
-  });
+  const [commande, parametres] = await Promise.all([
+    prisma.commande.findUnique({
+      where: { id: params.id },
+      include: { details: true, paiement: true, livraison: true, avis: true, client: true },
+    }),
+    prisma.parametres.findUnique({ where: { id: "site" }, select: { telephone: true } }),
+  ]);
   if (!commande) notFound();
 
   const client = getClientCookie();
@@ -105,6 +108,15 @@ export default async function CommandeDetailPage({ params }: { params: { id: str
       </div>
 
       {["RECUE", "CONFIRMEE"].includes(statut) && <AnnulerCommande commandeId={commande.id} />}
+
+      {["EN_PREPARATION", "PRETE", "EN_LIVRAISON"].includes(statut) && parametres?.telephone && (
+        <p className="text-center text-xs text-ink/50">
+          Besoin de modifier ou d&apos;annuler cette commande ?{" "}
+          <a href={`tel:${parametres.telephone.replace(/[^+\d]/g, "")}`} className="underline">
+            Appelez-nous au {parametres.telephone}
+          </a>
+        </p>
+      )}
 
       {statut === "LIVREE" && !commande.avis && <AvisForm commandeId={commande.id} />}
       {commande.avis && (
