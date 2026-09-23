@@ -8,7 +8,10 @@ import PlatCard from "@/components/PlatCard";
 export const revalidate = 60;
 
 export default async function MenuPage() {
-  const plats = await prisma.plat.findMany({ orderBy: { createdAt: "asc" } });
+  const plats = await prisma.plat.findMany({
+    where: { disponible: true },
+    orderBy: { createdAt: "asc" },
+  });
 
   const categories = Array.from(new Set(plats.map((p) => p.categorie ?? "Plats")));
 

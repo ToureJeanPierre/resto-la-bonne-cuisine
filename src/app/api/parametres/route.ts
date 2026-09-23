@@ -8,6 +8,7 @@ const VALEURS_PAR_DEFAUT = {
   adresse: "Adresse à préciser, Abidjan",
   telephone: "+225 00 00 00 00",
   horaires: "Tous les jours, 9h — 22h",
+  fideliteActive: true,
 };
 
 export async function GET() {
@@ -19,7 +20,7 @@ export async function PATCH(req: NextRequest) {
   const guard = await requireRole("ADMIN");
   if ("error" in guard) return guard.error;
 
-  const { adresse, telephone, horaires } = await req.json();
+  const { adresse, telephone, horaires, fideliteActive } = await req.json();
 
   const parametres = await prisma.parametres.upsert({
     where: { id: "site" },
@@ -28,11 +29,13 @@ export async function PATCH(req: NextRequest) {
       adresse: adresse ?? VALEURS_PAR_DEFAUT.adresse,
       telephone: telephone ?? VALEURS_PAR_DEFAUT.telephone,
       horaires: horaires ?? VALEURS_PAR_DEFAUT.horaires,
+      fideliteActive: fideliteActive ?? VALEURS_PAR_DEFAUT.fideliteActive,
     },
     update: {
       ...(adresse !== undefined && { adresse }),
       ...(telephone !== undefined && { telephone }),
       ...(horaires !== undefined && { horaires }),
+      ...(fideliteActive !== undefined && { fideliteActive: Boolean(fideliteActive) }),
     },
   });
 

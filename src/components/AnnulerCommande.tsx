@@ -23,8 +23,12 @@ export default function AnnulerCommande({ commandeId }: { commandeId: string }) 
   }
 
   return (
-    <div>
-      <button onClick={annuler} disabled={envoi} className="btn-secondary w-full">
+    <div className="text-center">
+      <button
+        onClick={annuler}
+        disabled={envoi}
+        className="text-sm text-ink/40 underline underline-offset-2 disabled:opacity-50"
+      >
         {envoi ? "Annulation..." : "Annuler la commande"}
       </button>
       {erreur && <p className="mt-2 text-sm text-red-700">{erreur}</p>}

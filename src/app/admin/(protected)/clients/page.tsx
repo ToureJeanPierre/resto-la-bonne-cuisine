@@ -11,6 +11,7 @@ type Client = {
   montantTotal: number;
   credits: number;
   recompensesDisponibles: number;
+  fideliteActive: boolean;
   derniereCommande: string | null;
 };
 
@@ -37,6 +38,15 @@ export default function AdminClientsPage() {
       body: JSON.stringify({ credits, recompensesDisponibles: recompenses }),
     });
     setEnEdition(null);
+    charger();
+  }
+
+  async function basculerFideliteClient(clientId: string, active: boolean) {
+    await fetch(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fideliteActive: active }),
+    });
     charger();
   }
 
@@ -74,12 +84,22 @@ export default function AdminClientsPage() {
                 onValider={(credits, recompenses) => corrigerFidelite(c.id, credits, recompenses)}
               />
             ) : (
-              <button
-                onClick={() => setEnEdition(c.id)}
-                className="text-xs font-semibold text-ink/50"
-              >
-                Corriger la fidélité
-              </button>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setEnEdition(c.id)}
+                  className="text-xs font-semibold text-ink/50"
+                >
+                  Corriger la fidélité
+                </button>
+                <button
+                  onClick={() => basculerFideliteClient(c.id, !c.fideliteActive)}
+                  className={`text-xs font-semibold ${
+                    c.fideliteActive ? "text-red-600" : "text-green-600"
+                  }`}
+                >
+                  {c.fideliteActive ? "Désactiver la fidélité" : "Réactiver la fidélité"}
+                </button>
+              </div>
             )}
           </div>
         ))}

@@ -24,14 +24,19 @@ export default async function ProfilPage() {
     );
   }
 
-  const [donneesClient, fidelite, commandes] = await Promise.all([
+  const [donneesClient, fidelite, commandes, parametres] = await Promise.all([
     prisma.client.findUnique({ where: { id: client.id } }),
     prisma.fidelite.findUnique({ where: { clientId: client.id } }),
     prisma.commande.count({ where: { clientId: client.id } }),
+    prisma.parametres.findUnique({ where: { id: "site" }, select: { fideliteActive: true } }),
   ]);
 
   const credits = fidelite?.credits ?? 0;
   const recompenses = fidelite?.recompensesDisponibles ?? 0;
+  const fideliteActive = (parametres?.fideliteActive ?? true) && (donneesClient?.fideliteActive ?? true);
+  // On garde le programme visible si le client a déjà de la progression ou
+  // une récompense en cours, même si on vient de le désactiver.
+  const afficherFidelite = fideliteActive || credits > 0 || recompenses > 0;
 
   return (
     <div className="space-y-5 p-4">
@@ -43,6 +48,7 @@ export default async function ProfilPage() {
         {donneesClient?.adresse && <p className="text-sm text-ink/60">{donneesClient.adresse}</p>}
       </div>
 
+      {afficherFidelite && (
       <div className="card space-y-2 p-4">
         <p className="font-semibold">🎁 Fidélité</p>
         {recompenses > 0 ? (
@@ -62,6 +68,7 @@ export default async function ProfilPage() {
         )}
         <p className="text-xs text-ink/40">5 repas achetés et livrés = 1 repas offert</p>
       </div>
+      )}
 
       <Link href="/commandes" className="card flex items-center justify-between p-4">
         <span>Historique des commandes</span>

@@ -15,7 +15,9 @@ export default function CheckoutPage() {
   const [modeLivraison, setModeLivraison] = useState<"LIVRAISON" | "RETRAIT">("LIVRAISON");
   const [adresseLivraison, setAdresseLivraison] = useState("");
   const [precisionAdresse, setPrecisionAdresse] = useState("");
-  const [moyenPaiement, setMoyenPaiement] = useState<(typeof MOYENS_PAIEMENT)[number]>("TEST");
+  const [moyenPaiement, setMoyenPaiement] = useState<(typeof MOYENS_PAIEMENT)[number]>(
+    "A_LA_LIVRAISON"
+  );
   const [recompensesDisponibles, setRecompensesDisponibles] = useState(0);
   const [utiliserRecompense, setUtiliserRecompense] = useState(false);
   const [erreur, setErreur] = useState<string | null>(null);
@@ -154,22 +156,33 @@ export default function CheckoutPage() {
 
       <div className="card space-y-2 p-4">
         <p className="text-sm font-medium text-ink/70">Mode de paiement</p>
-        {MOYENS_PAIEMENT.map((moyen) => (
-          <label
-            key={moyen}
-            className={`flex items-center gap-2 rounded-lg border px-3 py-2 ${
-              moyenPaiement === moyen ? "border-gold bg-gold/10" : "border-black/10"
-            }`}
-          >
-            <input
-              type="radio"
-              name="moyenPaiement"
-              checked={moyenPaiement === moyen}
-              onChange={() => setMoyenPaiement(moyen)}
-            />
-            {LABELS_MOYEN_PAIEMENT[moyen]}
-          </label>
-        ))}
+        {MOYENS_PAIEMENT.filter((m) => m !== "TEST").map((moyen) => {
+          const disponible = moyen === "A_LA_LIVRAISON";
+          return (
+            <label
+              key={moyen}
+              className={`flex items-center justify-between gap-2 rounded-lg border px-3 py-2 ${
+                !disponible
+                  ? "border-black/5 bg-black/5 text-ink/30"
+                  : moyenPaiement === moyen
+                    ? "border-gold bg-gold/10"
+                    : "border-black/10"
+              }`}
+            >
+              <span className="flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="moyenPaiement"
+                  checked={moyenPaiement === moyen}
+                  onChange={() => setMoyenPaiement(moyen)}
+                  disabled={!disponible}
+                />
+                {LABELS_MOYEN_PAIEMENT[moyen]}
+              </span>
+              {!disponible && <span className="text-xs italic">Bientôt disponible</span>}
+            </label>
+          );
+        })}
       </div>
 
       {recompensesDisponibles > 0 && (

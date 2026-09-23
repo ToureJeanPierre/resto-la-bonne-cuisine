@@ -24,6 +24,7 @@ export async function GET() {
       .reduce((sum, cmd) => sum + cmd.total, 0),
     credits: c.fidelite?.credits ?? 0,
     recompensesDisponibles: c.fidelite?.recompensesDisponibles ?? 0,
+    fideliteActive: c.fideliteActive,
     derniereCommande: c.commandes[0]?.createdAt ?? null,
   }));
 
