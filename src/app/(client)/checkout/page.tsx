@@ -26,6 +26,16 @@ export default function CheckoutPage() {
       .then((r) => r.json())
       .then((data) => setRecompensesDisponibles(data.recompensesDisponibles ?? 0))
       .catch(() => {});
+
+    fetch("/api/client/me")
+      .then((r) => r.json())
+      .then((data) => {
+        if (!data) return;
+        if (data.nom) setNom(data.nom);
+        if (data.telephone) setTelephone(data.telephone);
+        if (data.adresse) setAdresseLivraison(data.adresse);
+      })
+      .catch(() => {});
   }, []);
 
   const remise = utiliserRecompense && recompensesDisponibles > 0 ? Math.min(...items.map((i) => i.prix)) : 0;
@@ -178,12 +188,6 @@ export default function CheckoutPage() {
           <span>Sous-total</span>
           <span>{formatFCFA(sousTotal)}</span>
         </div>
-        {modeLivraison === "LIVRAISON" && (
-          <div className="flex justify-between text-ink/70">
-            <span>Livraison</span>
-            <span className="text-sm italic">à confirmer avec la restauratrice</span>
-          </div>
-        )}
         {remise > 0 && (
           <div className="flex justify-between text-green-700">
             <span>Récompense fidélité</span>
@@ -194,12 +198,6 @@ export default function CheckoutPage() {
           <span>TOTAL</span>
           <span>{formatFCFA(total)}</span>
         </div>
-        {modeLivraison === "LIVRAISON" && (
-          <p className="text-xs text-ink/50">
-            Les frais de livraison seront confirmés par la restauratrice après réception de
-            votre commande et ajoutés au total.
-          </p>
-        )}
       </div>
 
       {erreur && <p className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{erreur}</p>}

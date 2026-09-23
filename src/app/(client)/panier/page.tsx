@@ -65,10 +65,6 @@ export default function PanierPage() {
           <span>Sous-total</span>
           <span>{formatFCFA(sousTotal)}</span>
         </div>
-        <div className="flex justify-between text-ink/70">
-          <span>Livraison (si applicable)</span>
-          <span className="text-sm italic">à confirmer</span>
-        </div>
         <div className="flex justify-between border-t border-black/10 pt-2 text-lg font-bold">
           <span>TOTAL</span>
           <span>{formatFCFA(sousTotal)}</span>

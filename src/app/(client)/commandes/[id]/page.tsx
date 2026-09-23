@@ -88,25 +88,16 @@ export default async function CommandeDetailPage({ params }: { params: { id: str
             <span>{formatFCFA(d.prixUnitaire * d.quantite)}</span>
           </div>
         ))}
-        {commande.modeLivraison === "LIVRAISON" && (
+        {commande.modeLivraison === "LIVRAISON" && commande.fraisLivraisonConfirme && (
           <div className="flex justify-between text-sm">
             <span>Livraison</span>
-            {commande.fraisLivraisonConfirme ? (
-              <span>{formatFCFA(commande.fraisLivraison)}</span>
-            ) : (
-              <span className="italic text-ink/50">à confirmer</span>
-            )}
+            <span>{formatFCFA(commande.fraisLivraison)}</span>
           </div>
         )}
         <div className="flex justify-between border-t border-black/10 pt-2 font-bold">
           <span>Total</span>
           <span>{formatFCFA(commande.total)}</span>
         </div>
-        {commande.modeLivraison === "LIVRAISON" && !commande.fraisLivraisonConfirme && (
-          <p className="text-xs text-ink/50">
-            Hors frais de livraison, qui seront ajoutés une fois confirmés.
-          </p>
-        )}
       </div>
 
       <div className="card space-y-1 p-4 text-sm text-ink/70">
