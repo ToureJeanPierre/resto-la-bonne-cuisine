@@ -60,6 +60,7 @@ export async function POST(req: NextRequest) {
     sub: utilisateur.id,
     role: utilisateur.role as "ADMIN" | "LIVREUR",
     nom: utilisateur.nom,
+    ver: utilisateur.sessionVersion,
   });
 
   return NextResponse.json({ id: utilisateur.id, nom: utilisateur.nom, role: utilisateur.role });

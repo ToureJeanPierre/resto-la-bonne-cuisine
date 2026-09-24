@@ -28,6 +28,10 @@ model Utilisateur {
   actif              Boolean   @default(true)
   tentativesEchouees Int       @default(0)
   verrouJusqua       DateTime?
+  // Incrémenté à chaque changement de mot de passe (ou désactivation) :
+  // toute session déjà ouverte devient invalide dès la requête suivante,
+  // sans attendre l'expiration du cookie (jusqu'à 30 jours sinon).
+  sessionVersion     Int       @default(0)
   createdAt          DateTime  @default(now())
 
   livraisons   Livraison[]

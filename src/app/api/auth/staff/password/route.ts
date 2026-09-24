@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { getStaffSession } from "@/lib/auth";
+import { getStaffSession, clearStaffSession } from "@/lib/auth";
 
 export async function PATCH(req: NextRequest) {
   const session = await getStaffSession();
@@ -34,7 +34,15 @@ export async function PATCH(req: NextRequest) {
   }
 
   const motDePasse = await bcrypt.hash(nouveauMotDePasse, 10);
-  await prisma.utilisateur.update({ where: { id: utilisateur.id }, data: { motDePasse } });
+  await prisma.utilisateur.update({
+    where: { id: utilisateur.id },
+    data: { motDePasse, sessionVersion: { increment: 1 } },
+  });
 
-  return NextResponse.json({ ok: true });
+  // Le changement invalide aussi la session en cours (voir getStaffSession) :
+  // on efface le cookie tout de suite, y compris pour la personne qui vient
+  // de changer son propre mot de passe.
+  clearStaffSession();
+
+  return NextResponse.json({ ok: true, role: utilisateur.role });
 }

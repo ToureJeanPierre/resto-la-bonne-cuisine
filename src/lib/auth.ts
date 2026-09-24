@@ -1,5 +1,6 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { prisma } from "@/lib/prisma";
 
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET ?? "dev-secret-change-in-production-please"
@@ -9,6 +10,7 @@ export type SessionPayload = {
   sub: string;
   role: "ADMIN" | "LIVREUR";
   nom: string;
+  ver: number;
 };
 
 const STAFF_COOKIE = "lbc_staff_session";
@@ -35,7 +37,20 @@ export async function getStaffSession(): Promise<SessionPayload | null> {
   if (!token) return null;
   try {
     const { payload } = await jwtVerify(token, secret);
-    return payload as unknown as SessionPayload;
+    const session = payload as unknown as SessionPayload;
+
+    // Revérifié à chaque requête (pas seulement à la connexion) : un compte
+    // désactivé ou dont le mot de passe vient de changer perd l'accès tout
+    // de suite, même s'il avait déjà une session ouverte dans le navigateur.
+    const utilisateur = await prisma.utilisateur.findUnique({
+      where: { id: session.sub },
+      select: { actif: true, sessionVersion: true },
+    });
+    if (!utilisateur || !utilisateur.actif || utilisateur.sessionVersion !== session.ver) {
+      return null;
+    }
+
+    return session;
   } catch {
     return null;
   }

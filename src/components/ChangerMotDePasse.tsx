@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function ChangerMotDePasse() {
+  const pathname = usePathname();
+  const router = useRouter();
   const [ancienMotDePasse, setAncienMotDePasse] = useState("");
   const [nouveauMotDePasse, setNouveauMotDePasse] = useState("");
   const [confirmation, setConfirmation] = useState("");
@@ -34,14 +37,16 @@ export default function ChangerMotDePasse() {
         setErreur(data.error ?? "Impossible de changer le mot de passe.");
         return;
       }
-      setAncienMotDePasse("");
-      setNouveauMotDePasse("");
-      setConfirmation("");
       setSucces(true);
-      setTimeout(() => setSucces(false), 3000);
+      // Le changement invalide la session en cours : on renvoie vers la
+      // page de connexion pour se reconnecter avec le nouveau mot de passe.
+      const connexion = pathname.startsWith("/livreur") ? "/livreur/login" : "/admin/login";
+      setTimeout(() => {
+        router.push(connexion);
+        router.refresh();
+      }, 1500);
     } catch {
       setErreur("Impossible d'envoyer la demande. Vérifiez votre connexion.");
-    } finally {
       setEnvoi(false);
     }
   }
@@ -78,7 +83,11 @@ export default function ChangerMotDePasse() {
       </label>
       {erreur && <p className="text-sm text-red-700">{erreur}</p>}
       <button onClick={valider} disabled={envoi} className="btn-secondary w-full">
-        {envoi ? "Enregistrement..." : succes ? "✅ Mot de passe modifié !" : "Changer le mot de passe"}
+        {succes
+          ? "✅ Mot de passe modifié ! Reconnexion..."
+          : envoi
+            ? "Enregistrement..."
+            : "Changer le mot de passe"}
       </button>
     </div>
   );
