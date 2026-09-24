@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ChangerMotDePasse from "@/components/ChangerMotDePasse";
 
 export default function AdminParametresPage() {
   const [adresse, setAdresse] = useState("");
@@ -110,6 +111,8 @@ export default function AdminParametresPage() {
         Tu peux aussi désactiver la fidélité pour un client précis depuis sa fiche dans{" "}
         <span className="font-semibold">Admin → Clients</span>.
       </p>
+
+      <ChangerMotDePasse />
     </div>
   );
 }

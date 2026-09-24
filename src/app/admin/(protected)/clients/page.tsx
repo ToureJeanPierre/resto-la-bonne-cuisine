@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { formatFCFA } from "@/lib/format";
+import Pagination from "@/components/Pagination";
+
+const LIMITE = 20;
 
 type Client = {
   id: string;
@@ -17,19 +20,26 @@ type Client = {
 
 export default function AdminClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [chargement, setChargement] = useState(true);
   const [enEdition, setEnEdition] = useState<string | null>(null);
 
   function charger() {
-    fetch("/api/clients")
+    setChargement(true);
+    fetch(`/api/clients?page=${page}&limit=${LIMITE}`)
       .then((r) => r.json())
-      .then(setClients)
+      .then((data) => {
+        setClients(data.clients);
+        setTotal(data.total);
+      })
       .finally(() => setChargement(false));
   }
 
   useEffect(() => {
     charger();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   async function corrigerFidelite(clientId: string, credits: number, recompenses: number) {
     await fetch(`/api/clients/${clientId}/fidelite`, {
@@ -107,6 +117,8 @@ export default function AdminClientsPage() {
           <p className="text-center text-ink/60">Aucun client pour le moment.</p>
         )}
       </div>
+
+      <Pagination page={page} total={total} limit={LIMITE} onChange={setPage} />
     </div>
   );
 }

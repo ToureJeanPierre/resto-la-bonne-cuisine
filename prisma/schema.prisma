@@ -20,13 +20,15 @@ datasource db {
 // Compte interne (admin, livreur) — les clients ne créent pas de compte,
 // ils sont identifiés par leur numéro de téléphone.
 model Utilisateur {
-  id           String   @id @default(cuid())
-  nom          String
-  telephone    String   @unique
-  motDePasse   String
-  role         String
-  actif        Boolean  @default(true)
-  createdAt    DateTime @default(now())
+  id                 String    @id @default(cuid())
+  nom                String
+  telephone          String    @unique
+  motDePasse         String
+  role               String
+  actif              Boolean   @default(true)
+  tentativesEchouees Int       @default(0)
+  verrouJusqua       DateTime?
+  createdAt          DateTime  @default(now())
 
   livraisons   Livraison[]
 }
@@ -173,4 +175,13 @@ model Parametres {
   horaires       String
   fideliteActive Boolean  @default(true)
   updatedAt      DateTime @updatedAt
+}
+
+// Compteur atomique pour le numéro de commande (id fixe "commande") : un
+// UPDATE … SET valeur = valeur + 1 est verrouillé au niveau de la ligne par
+// Postgres, ce qui évite que deux commandes simultanées reçoivent le même
+// numéro (findFirst + 1 n'offrait aucune garantie de ce type).
+model Compteur {
+  id     String @id
+  valeur Int
 }

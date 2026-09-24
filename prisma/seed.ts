@@ -124,6 +124,16 @@ async function main() {
     update: {},
   });
 
+  // Compteur des numéros de commande : créé une seule fois, initialisé au
+  // plus grand numéro déjà attribué (ou 1000 si la base est vierge), puis
+  // plus jamais touché par le seed — seules les commandes l'incrémentent.
+  const dernierNumero = await prisma.commande.aggregate({ _max: { numero: true } });
+  await prisma.compteur.upsert({
+    where: { id: "commande" },
+    create: { id: "commande", valeur: dernierNumero._max.numero ?? 1000 },
+    update: {},
+  });
+
   console.log("Seed terminé.");
   console.log("Admin: 0700000001 / admin1234");
   console.log("Livreur: 0700000002 / livreur1234");

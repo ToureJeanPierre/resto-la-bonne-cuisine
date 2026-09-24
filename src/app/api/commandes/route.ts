@@ -89,38 +89,43 @@ export async function POST(req: NextRequest) {
   const fraisLivraisonConfirme = modeLivraison === "RETRAIT";
   const total = Math.max(0, sousTotal - remisePlatOffert);
 
-  const dernierNumero = await prisma.commande.findFirst({
-    orderBy: { numero: "desc" },
-    select: { numero: true },
-  });
-  const numero = (dernierNumero?.numero ?? 1000) + 1;
+  // Le numéro de commande vient d'un compteur en base incrémenté de façon
+  // atomique (UPDATE verrouillé au niveau de la ligne par Postgres) : deux
+  // commandes créées au même instant ne peuvent jamais recevoir le même
+  // numéro, contrairement à un simple "dernier numéro + 1" en lecture.
+  const commande = await prisma.$transaction(async (tx) => {
+    const compteur = await tx.compteur.update({
+      where: { id: "commande" },
+      data: { valeur: { increment: 1 } },
+    });
 
-  const commande = await prisma.commande.create({
-    data: {
-      numero,
-      clientId: client.id,
-      total,
-      fraisLivraison: 0,
-      fraisLivraisonConfirme,
-      remiseFidelite: remisePlatOffert,
-      modeLivraison,
-      adresseLivraison: adresseLivraison ?? null,
-      precisionAdresse: precisionAdresse ?? null,
-      qrCode: randomUUID(),
-      codeSecours: genererCodeSecours(),
-      details: {
-        create: items.map((item) => {
-          const plat = plats.find((p) => p.id === item.platId)!;
-          return {
-            platId: plat.id,
-            nomPlat: plat.nom,
-            quantite: item.quantite,
-            prixUnitaire: plat.prix,
-          };
-        }),
+    return tx.commande.create({
+      data: {
+        numero: compteur.valeur,
+        clientId: client.id,
+        total,
+        fraisLivraison: 0,
+        fraisLivraisonConfirme,
+        remiseFidelite: remisePlatOffert,
+        modeLivraison,
+        adresseLivraison: adresseLivraison ?? null,
+        precisionAdresse: precisionAdresse ?? null,
+        qrCode: randomUUID(),
+        codeSecours: genererCodeSecours(),
+        details: {
+          create: items.map((item) => {
+            const plat = plats.find((p) => p.id === item.platId)!;
+            return {
+              platId: plat.id,
+              nomPlat: plat.nom,
+              quantite: item.quantite,
+              prixUnitaire: plat.prix,
+            };
+          }),
+        },
       },
-    },
-    include: { details: true },
+      include: { details: true },
+    });
   });
 
   const provider = getPaymentProvider(moyenPaiement);
@@ -152,6 +157,8 @@ export async function POST(req: NextRequest) {
   return NextResponse.json(commande, { status: 201 });
 }
 
+const LIMITE_PAR_DEFAUT = 20;
+
 export async function GET(req: NextRequest) {
   const statut = req.nextUrl.searchParams.get("statut");
   const asAdmin = req.nextUrl.searchParams.get("scope") === "admin";
@@ -160,12 +167,21 @@ export async function GET(req: NextRequest) {
     const guard = await requireRole("ADMIN");
     if ("error" in guard) return guard.error;
 
-    const commandes = await prisma.commande.findMany({
-      where: statut ? { statut: statut as any } : undefined,
-      include: { details: true, client: true, paiement: true, livraison: true },
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(commandes);
+    const page = Math.max(1, Number(req.nextUrl.searchParams.get("page")) || 1);
+    const limit = Math.max(1, Number(req.nextUrl.searchParams.get("limit")) || LIMITE_PAR_DEFAUT);
+    const where = statut ? { statut: statut as any } : undefined;
+
+    const [total, commandes] = await Promise.all([
+      prisma.commande.count({ where }),
+      prisma.commande.findMany({
+        where,
+        include: { details: true, client: true, paiement: true, livraison: true },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+    ]);
+    return NextResponse.json({ commandes, total, page, limit });
   }
 
   const client = getClientCookie();

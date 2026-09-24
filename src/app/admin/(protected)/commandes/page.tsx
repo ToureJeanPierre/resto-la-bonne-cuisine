@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react";
 import { formatFCFA } from "@/lib/format";
 import { STATUTS_COMMANDE, LABELS_STATUT_COMMANDE, StatutCommande } from "@/lib/constants";
+import Pagination from "@/components/Pagination";
+
+const LIMITE = 20;
 
 type Commande = {
   id: string;
@@ -28,25 +31,28 @@ const FILTRES: { label: string; valeur: StatutCommande | "TOUTES" }[] = [
 
 export default function AdminCommandesPage() {
   const [commandes, setCommandes] = useState<Commande[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [filtre, setFiltre] = useState<StatutCommande | "TOUTES">("TOUTES");
   const [chargement, setChargement] = useState(true);
 
   function charger() {
     setChargement(true);
-    const url =
-      filtre === "TOUTES"
-        ? "/api/commandes?scope=admin"
-        : `/api/commandes?scope=admin&statut=${filtre}`;
-    fetch(url)
+    const params = new URLSearchParams({ scope: "admin", page: String(page), limit: String(LIMITE) });
+    if (filtre !== "TOUTES") params.set("statut", filtre);
+    fetch(`/api/commandes?${params}`)
       .then((r) => r.json())
-      .then(setCommandes)
+      .then((data) => {
+        setCommandes(data.commandes);
+        setTotal(data.total);
+      })
       .finally(() => setChargement(false));
   }
 
   useEffect(() => {
     charger();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtre]);
+  }, [filtre, page]);
 
   async function changerStatut(id: string, statut: string) {
     await fetch(`/api/commandes/${id}`, {
@@ -74,7 +80,10 @@ export default function AdminCommandesPage() {
         {FILTRES.map((f) => (
           <button
             key={f.valeur}
-            onClick={() => setFiltre(f.valeur)}
+            onClick={() => {
+              setFiltre(f.valeur);
+              setPage(1);
+            }}
             className={`flex-shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${
               filtre === f.valeur ? "bg-gold text-ink" : "bg-black/5 text-ink/60"
             }`}
@@ -130,6 +139,8 @@ export default function AdminCommandesPage() {
           <p className="text-center text-ink/60">Aucune commande.</p>
         )}
       </div>
+
+      <Pagination page={page} total={total} limit={LIMITE} onChange={setPage} />
     </div>
   );
 }

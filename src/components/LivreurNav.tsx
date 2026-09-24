@@ -41,6 +41,14 @@ export default function LivreurNav({ nom }: { nom: string }) {
         >
           📷 Scanner
         </Link>
+        <Link
+          href="/livreur/compte"
+          className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+            pathname === "/livreur/compte" ? "bg-gold text-ink" : "bg-black/5 text-ink/60"
+          }`}
+        >
+          👤 Mon compte
+        </Link>
       </nav>
     </header>
   );
