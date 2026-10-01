@@ -134,6 +134,25 @@ async function main() {
     update: {},
   });
 
+  // Dépannage "mot de passe admin oublié" : n'agit que si la variable
+  // d'environnement RESET_ADMIN_PASSWORD est définie sur Vercel. Inoffensif
+  // tant qu'elle n'existe pas — à ajouter temporairement puis supprimer
+  // juste après usage, sinon le mot de passe serait réimposé à chaque
+  // déploiement suivant.
+  if (process.env.RESET_ADMIN_PASSWORD) {
+    const motDePasse = await bcrypt.hash(process.env.RESET_ADMIN_PASSWORD, 10);
+    await prisma.utilisateur.updateMany({
+      where: { telephone: "0700000001", role: "ADMIN" },
+      data: {
+        motDePasse,
+        sessionVersion: { increment: 1 },
+        tentativesEchouees: 0,
+        verrouJusqua: null,
+      },
+    });
+    console.log("Mot de passe admin réinitialisé via RESET_ADMIN_PASSWORD.");
+  }
+
   console.log("Seed terminé.");
   console.log("Admin: 0700000001 / admin1234");
   console.log("Livreur: 0700000002 / livreur1234");
