@@ -2,12 +2,23 @@
 
 import { useEffect, useState } from "react";
 import ChangerMotDePasse from "@/components/ChangerMotDePasse";
+import ChampPhoto from "@/components/ChampPhoto";
+import {
+  LOGO_PAR_DEFAUT,
+  BANNER_PAR_DEFAUT,
+  COULEUR_GOLD_PAR_DEFAUT,
+  COULEUR_INK_PAR_DEFAUT,
+} from "@/lib/branding-defaults";
 
 export default function AdminParametresPage() {
   const [adresse, setAdresse] = useState("");
   const [telephone, setTelephone] = useState("");
   const [horaires, setHoraires] = useState("");
   const [fideliteActive, setFideliteActive] = useState(true);
+  const [logoUrl, setLogoUrl] = useState(LOGO_PAR_DEFAUT);
+  const [bannerUrl, setBannerUrl] = useState(BANNER_PAR_DEFAUT);
+  const [couleurPrimaire, setCouleurPrimaire] = useState(COULEUR_GOLD_PAR_DEFAUT);
+  const [couleurSombre, setCouleurSombre] = useState(COULEUR_INK_PAR_DEFAUT);
   const [chargement, setChargement] = useState(true);
   const [envoi, setEnvoi] = useState(false);
   const [enregistre, setEnregistre] = useState(false);
@@ -20,6 +31,10 @@ export default function AdminParametresPage() {
         setTelephone(data.telephone);
         setHoraires(data.horaires);
         setFideliteActive(data.fideliteActive ?? true);
+        setLogoUrl(data.logoUrl || LOGO_PAR_DEFAUT);
+        setBannerUrl(data.bannerUrl || BANNER_PAR_DEFAUT);
+        setCouleurPrimaire(data.couleurPrimaire || COULEUR_GOLD_PAR_DEFAUT);
+        setCouleurSombre(data.couleurSombre || COULEUR_INK_PAR_DEFAUT);
       })
       .finally(() => setChargement(false));
   }, []);
@@ -30,11 +45,21 @@ export default function AdminParametresPage() {
     await fetch("/api/parametres", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ adresse, telephone, horaires }),
+      body: JSON.stringify({
+        adresse,
+        telephone,
+        horaires,
+        logoUrl,
+        bannerUrl,
+        couleurPrimaire,
+        couleurSombre,
+      }),
     });
     setEnvoi(false);
     setEnregistre(true);
-    setTimeout(() => setEnregistre(false), 2000);
+    // Les couleurs/images sont lues au chargement de la page (layout racine) :
+    // on recharge après un court délai pour voir tout de suite le résultat.
+    setTimeout(() => window.location.reload(), 800);
   }
 
   async function basculerFidelite(active: boolean) {
@@ -81,6 +106,53 @@ export default function AdminParametresPage() {
             className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2"
           />
         </label>
+      </div>
+
+      <div className="card space-y-4 p-4">
+        <div>
+          <p className="font-semibold">🎨 Identité visuelle</p>
+          <p className="text-sm text-ink/60">
+            Logo, bannière et couleurs du site. Les changements s&apos;appliquent à toute
+            l&apos;application dès que tu enregistres, sans rien redéployer.
+          </p>
+        </div>
+
+        <ChampPhoto
+          valeur={logoUrl}
+          onChange={setLogoUrl}
+          label="Logo"
+          texteAlternatif="Logo du restaurant"
+          emoji="🏠"
+        />
+
+        <ChampPhoto
+          valeur={bannerUrl}
+          onChange={setBannerUrl}
+          label="Bannière (page d'accueil)"
+          texteAlternatif="Bannière du restaurant"
+          emoji="🖼️"
+        />
+
+        <div className="flex gap-4">
+          <label className="flex-1">
+            <span className="text-sm font-medium text-ink/70">Couleur principale</span>
+            <input
+              type="color"
+              value={couleurPrimaire}
+              onChange={(e) => setCouleurPrimaire(e.target.value)}
+              className="mt-1 h-10 w-full rounded-lg border border-black/10"
+            />
+          </label>
+          <label className="flex-1">
+            <span className="text-sm font-medium text-ink/70">Couleur sombre (texte)</span>
+            <input
+              type="color"
+              value={couleurSombre}
+              onChange={(e) => setCouleurSombre(e.target.value)}
+              className="mt-1 h-10 w-full rounded-lg border border-black/10"
+            />
+          </label>
+        </div>
       </div>
 
       <button onClick={enregistrer} disabled={envoi} className="btn-primary w-full">

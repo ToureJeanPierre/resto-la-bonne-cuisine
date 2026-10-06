@@ -173,12 +173,19 @@ model Notification {
 // Ligne unique (id fixe "site") : coordonnées du restaurant affichées en
 // pied de page, modifiables par la restauratrice depuis l'administration.
 model Parametres {
-  id             String   @id @default("site")
-  adresse        String
-  telephone      String
-  horaires       String
-  fideliteActive Boolean  @default(true)
-  updatedAt      DateTime @updatedAt
+  id              String   @id @default("site")
+  adresse         String
+  telephone       String
+  horaires        String
+  fideliteActive  Boolean  @default(true)
+  // Identité visuelle modifiable depuis l'admin, sans redéploiement.
+  // Null = valeurs par défaut du code (logo/bannière d'origine, couleurs
+  // or/bleu marine d'origine) — voir src/lib/branding.ts.
+  logoUrl         String?
+  bannerUrl       String?
+  couleurPrimaire String?
+  couleurSombre   String?
+  updatedAt       DateTime @updatedAt
 }
 
 // Compteur atomique pour le numéro de commande (id fixe "commande") : un

@@ -1,9 +1,9 @@
-import Image from "next/image";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import SpecialiteCard from "@/components/SpecialiteCard";
 import ShareButton from "@/components/ShareButton";
 import Footer, { PARAMETRES_PAR_DEFAUT } from "@/components/Footer";
+import { BANNER_PAR_DEFAUT } from "@/lib/branding";
 
 export const revalidate = 30;
 
@@ -27,13 +27,11 @@ export default async function AccueilPage() {
   return (
     <div>
       <div className="relative">
-        <Image
-          src="/images/banner.webp"
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={parametres?.bannerUrl || BANNER_PAR_DEFAUT}
           alt="Restaurant L'Avocatier"
-          width={2000}
-          height={620}
           className="h-40 w-full object-cover"
-          priority
         />
       </div>
 

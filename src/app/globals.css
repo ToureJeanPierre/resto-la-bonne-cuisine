@@ -3,12 +3,17 @@
 @tailwind utilities;
 
 :root {
-  --gold: #c9a227;
+  /* Valeurs par défaut ; écrasées en ligne sur <html> par le layout racine
+     avec les couleurs choisies dans l'admin, si définies. */
+  --color-gold: #c9a227;
+  --color-gold-light: #e0c161;
+  --color-gold-dark: #9c7710;
+  --color-ink: #132c54;
 }
 
 body {
   background: #faf8f4;
-  color: #132c54;
+  color: var(--color-ink);
 }
 
 .btn-primary {

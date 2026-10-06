@@ -1,15 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useEffect, useState } from "react";
+import { LOGO_PAR_DEFAUT } from "@/lib/branding-defaults";
 
 export default function TopBar() {
   const pathname = usePathname();
   const { nombreArticles } = useCart();
   const [nonLues, setNonLues] = useState(0);
+  const [logoUrl, setLogoUrl] = useState(LOGO_PAR_DEFAUT);
 
   useEffect(() => {
     function charger() {
@@ -28,12 +29,20 @@ export default function TopBar() {
     return () => clearInterval(intervalle);
   }, []);
 
+  useEffect(() => {
+    fetch("/api/parametres")
+      .then((r) => r.json())
+      .then((data) => data?.logoUrl && setLogoUrl(data.logoUrl))
+      .catch(() => {});
+  }, []);
+
   if (pathname.startsWith("/admin") || pathname.startsWith("/livreur")) return null;
 
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between border-b border-black/5 bg-white/95 px-4 py-2.5 backdrop-blur">
       <Link href="/" className="flex items-center gap-2">
-        <Image src="/images/logo.webp" alt="Restaurant L'Avocatier" width={40} height={40} className="rounded-full" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={logoUrl} alt="Restaurant L'Avocatier" width={40} height={40} className="h-10 w-10 rounded-full object-cover" />
         <span className="font-display text-lg font-bold leading-tight text-ink">
           Restaurant
           <br />

@@ -41,9 +41,15 @@ async function compresser(fichier: File): Promise<File> {
 export default function ChampPhoto({
   valeur,
   onChange,
+  label = "Photo",
+  texteAlternatif = "Photo du plat",
+  emoji = "🍽️",
 }: {
   valeur: string;
   onChange: (url: string) => void;
+  label?: string;
+  texteAlternatif?: string;
+  emoji?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [envoi, setEnvoi] = useState(false);
@@ -76,14 +82,14 @@ export default function ChampPhoto({
 
   return (
     <div>
-      <span className="text-sm font-medium text-ink/70">Photo</span>
+      <span className="text-sm font-medium text-ink/70">{label}</span>
       <div className="mt-1 flex items-center gap-3">
         <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gold/10 text-2xl">
           {valeur ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={valeur} alt="Photo du plat" className="h-full w-full object-cover" />
+            <img src={valeur} alt={texteAlternatif} className="h-full w-full object-cover" />
           ) : (
-            "🍽️"
+            emoji
           )}
         </div>
         <button
