@@ -4,8 +4,8 @@ import { CartProvider } from "@/lib/cart-context";
 import RegisterSW from "@/components/RegisterSW";
 
 export const metadata: Metadata = {
-  title: "Restaurant Kalym",
-  description: "Le bon goût, notre passion — commandez le menu du jour et faites-vous livrer.",
+  title: "Restaurant L'Avocatier",
+  description: "Saveurs d'Afrique, plaisir de partager — commandez le menu du jour et faites-vous livrer.",
   manifest: "/manifest.json",
   icons: {
     icon: "/images/logo.webp",
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Restaurant Kalym",
+    title: "Restaurant L'Avocatier",
   },
 };
 

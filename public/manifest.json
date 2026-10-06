@@ -1,7 +1,7 @@
 {
-  "name": "Restaurant Kalym",
-  "short_name": "Kalym",
-  "description": "Le bon goût, notre passion — commandez le menu du jour et faites-vous livrer.",
+  "name": "Restaurant L'Avocatier",
+  "short_name": "L'Avocatier",
+  "description": "Saveurs d'Afrique, plaisir de partager — commandez le menu du jour et faites-vous livrer.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#faf8f4",

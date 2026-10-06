@@ -1,4 +1,4 @@
-# Restaurant Kalym — Application de commande, livraison et fidélisation
+# Restaurant L'Avocatier — Application de commande, livraison et fidélisation
 
 Prototype fonctionnel construit selon le cahier des charges : PWA mobile-first
 (Next.js) avec trois espaces — **client**, **restauratrice (admin)** et

@@ -29,7 +29,7 @@ export default async function AccueilPage() {
       <div className="relative">
         <Image
           src="/images/banner.webp"
-          alt="Restaurant Kalym"
+          alt="Restaurant L'Avocatier"
           width={2000}
           height={620}
           className="h-40 w-full object-cover"
@@ -41,7 +41,7 @@ export default async function AccueilPage() {
         <div>
           <h1 className="font-display text-2xl font-bold">Bonjour 👋</h1>
           <p className="mt-1 text-ink/70">
-            Restaurant Kalym vous propose une cuisine généreuse et authentique,
+            Restaurant L&apos;Avocatier vous propose une cuisine généreuse et authentique,
             préparée avec des produits frais chaque jour. Commandez votre plat
             préféré, on s&apos;occupe de vous livrer.
           </p>

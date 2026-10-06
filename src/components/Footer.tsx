@@ -15,8 +15,8 @@ export default function Footer({
   return (
     <footer className="mt-8 space-y-4 border-t border-black/10 bg-ink px-4 py-6 text-white">
       <div>
-        <p className="font-display text-lg font-bold">Restaurant Kalym</p>
-        <p className="text-sm text-white/60">Le bon goût, notre passion</p>
+        <p className="font-display text-lg font-bold">Restaurant L&apos;Avocatier</p>
+        <p className="text-sm text-white/60">Saveurs d&apos;Afrique, plaisir de partager</p>
       </div>
 
       <div className="space-y-2 text-sm text-white/80">
@@ -28,7 +28,7 @@ export default function Footer({
       </div>
 
       <p className="border-t border-white/10 pt-4 text-xs text-white/40">
-        © {new Date().getFullYear()} Restaurant Kalym. Tous droits réservés.
+        © {new Date().getFullYear()} Restaurant L&apos;Avocatier. Tous droits réservés.
       </p>
     </footer>
   );

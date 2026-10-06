@@ -33,11 +33,11 @@ export default function TopBar() {
   return (
     <header className="sticky top-0 z-30 flex items-center justify-between border-b border-black/5 bg-white/95 px-4 py-2.5 backdrop-blur">
       <Link href="/" className="flex items-center gap-2">
-        <Image src="/images/logo.webp" alt="Restaurant Kalym" width={40} height={40} className="rounded-full" />
+        <Image src="/images/logo.webp" alt="Restaurant L'Avocatier" width={40} height={40} className="rounded-full" />
         <span className="font-display text-lg font-bold leading-tight text-ink">
           Restaurant
           <br />
-          Kalym
+          L&apos;Avocatier
         </span>
       </Link>
       <div className="flex items-center gap-3">
