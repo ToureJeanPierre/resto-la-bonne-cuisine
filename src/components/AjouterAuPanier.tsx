@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
-import { useState } from "react";
 
 export default function AjouterAuPanier({
   plat,
@@ -11,12 +10,10 @@ export default function AjouterAuPanier({
 }) {
   const { ajouter } = useCart();
   const router = useRouter();
-  const [ajoute, setAjoute] = useState(false);
 
   function handleClick() {
     ajouter({ platId: plat.id, nom: plat.nom, prix: plat.prix, photo: plat.photo });
-    setAjoute(true);
-    setTimeout(() => setAjoute(false), 1200);
+    router.push("/panier");
   }
 
   if (!plat.disponible) {
@@ -28,13 +25,8 @@ export default function AjouterAuPanier({
   }
 
   return (
-    <div className="flex gap-2">
-      <button onClick={handleClick} className="btn-primary flex-1">
-        {ajoute ? "✅ Ajouté !" : "Ajouter au panier"}
-      </button>
-      <button onClick={() => router.push("/panier")} className="btn-secondary">
-        🛒
-      </button>
-    </div>
+    <button onClick={handleClick} className="btn-primary w-full">
+      Commander
+    </button>
   );
 }

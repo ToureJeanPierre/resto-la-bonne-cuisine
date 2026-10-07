@@ -60,6 +60,10 @@ export default function PanierPage() {
         ))}
       </div>
 
+      <Link href="/menu" className="btn-secondary w-full">
+        ➕ Ajouter un autre plat
+      </Link>
+
       <div className="card space-y-2 p-4">
         <div className="flex justify-between text-ink/70">
           <span>Sous-total</span>
