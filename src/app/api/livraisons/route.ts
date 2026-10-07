@@ -7,6 +7,7 @@ export async function GET() {
   if ("error" in guard) return guard.error;
 
   const livraisons = await prisma.livraison.findMany({
+    where: { commande: { supprimeLe: null } },
     include: { commande: { include: { client: true, details: true } }, livreur: true },
     orderBy: { createdAt: "desc" },
   });

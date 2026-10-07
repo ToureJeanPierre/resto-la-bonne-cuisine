@@ -10,7 +10,7 @@ export async function GET() {
   debutJour.setHours(0, 0, 0, 0);
 
   const commandesDuJour = await prisma.commande.findMany({
-    where: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" } },
+    where: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" }, supprimeLe: null },
     include: { client: true },
   });
 
@@ -24,11 +24,14 @@ export async function GET() {
   const clientsUniques = new Set(commandesDuJour.map((c) => c.clientId)).size;
 
   const recompensesDistribuees = await prisma.fidelite.aggregate({
+    where: { client: { supprimeLe: null } },
     _sum: { recompensesDisponibles: true },
   });
 
   const detailsDuJour = await prisma.detailCommande.findMany({
-    where: { commande: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" } } },
+    where: {
+      commande: { createdAt: { gte: debutJour }, statut: { not: "ANNULEE" }, supprimeLe: null },
+    },
   });
 
   const regroupement = new Map<string, number>();

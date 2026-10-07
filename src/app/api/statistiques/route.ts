@@ -27,24 +27,29 @@ export async function GET() {
     details,
     commandesHistorique,
   ] = await Promise.all([
-    prisma.commande.aggregate({ where: { statut: "LIVREE" }, _sum: { total: true } }),
     prisma.commande.aggregate({
-      where: { statut: "LIVREE", createdAt: { gte: debutJour } },
+      where: { statut: "LIVREE", supprimeLe: null },
       _sum: { total: true },
     }),
     prisma.commande.aggregate({
-      where: { statut: "LIVREE", createdAt: { gte: debutMois } },
+      where: { statut: "LIVREE", supprimeLe: null, createdAt: { gte: debutJour } },
       _sum: { total: true },
     }),
-    prisma.commande.count({ where: { statut: "LIVREE", createdAt: { gte: debutMois } } }),
-    prisma.commande.count({ where: { statut: "LIVREE" } }),
-    prisma.commande.count({ where: { statut: { not: "ANNULEE" } } }),
+    prisma.commande.aggregate({
+      where: { statut: "LIVREE", supprimeLe: null, createdAt: { gte: debutMois } },
+      _sum: { total: true },
+    }),
+    prisma.commande.count({
+      where: { statut: "LIVREE", supprimeLe: null, createdAt: { gte: debutMois } },
+    }),
+    prisma.commande.count({ where: { statut: "LIVREE", supprimeLe: null } }),
+    prisma.commande.count({ where: { statut: { not: "ANNULEE" }, supprimeLe: null } }),
     prisma.detailCommande.findMany({
-      where: { commande: { statut: "LIVREE" } },
+      where: { commande: { statut: "LIVREE", supprimeLe: null } },
       select: { nomPlat: true, quantite: true, prixUnitaire: true },
     }),
     prisma.commande.findMany({
-      where: { statut: "LIVREE", createdAt: { gte: debutHistorique } },
+      where: { statut: "LIVREE", supprimeLe: null, createdAt: { gte: debutHistorique } },
       select: { total: true, createdAt: true },
     }),
   ]);

@@ -10,6 +10,7 @@ export async function GET() {
     where: {
       livreurId: guard.session.sub,
       statut: { in: ["ASSIGNEE", "EN_ROUTE"] },
+      commande: { supprimeLe: null },
     },
     include: { commande: { include: { client: true, details: true } } },
     orderBy: { createdAt: "asc" },

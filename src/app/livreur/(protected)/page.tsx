@@ -8,7 +8,11 @@ export default async function LivreurLivraisonsPage() {
   const session = await getStaffSession();
 
   const livraisons = await prisma.livraison.findMany({
-    where: { livreurId: session!.sub, statut: { in: ["ASSIGNEE", "EN_ROUTE"] } },
+    where: {
+      livreurId: session!.sub,
+      statut: { in: ["ASSIGNEE", "EN_ROUTE"] },
+      commande: { supprimeLe: null },
+    },
     include: { commande: { include: { client: true, details: true } } },
     orderBy: { createdAt: "asc" },
   });

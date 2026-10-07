@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
     if ("error" in guard) return guard.error;
 
     const avis = await prisma.avis.findMany({
+      where: { commande: { supprimeLe: null } },
       include: { client: true, commande: true },
       orderBy: { createdAt: "desc" },
     });
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
   }
 
   const avis = await prisma.avis.findMany({
-    where: { masque: false },
+    where: { masque: false, commande: { supprimeLe: null } },
     include: { client: { select: { nom: true } } },
     orderBy: { createdAt: "desc" },
     take: 20,

@@ -17,7 +17,7 @@ export default async function AccueilPage() {
       take: 4,
     }),
     prisma.avis.aggregate({
-      where: { masque: false },
+      where: { masque: false, commande: { supprimeLe: null } },
       _avg: { note: true },
       _count: true,
     }),
