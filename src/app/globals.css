@@ -31,3 +31,51 @@ body {
 .badge {
   @apply inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold;
 }
+
+/* Bandeau promo (fidélité) : pensé pour accrocher l'œil — halo rouge qui
+   pulse + reflet lumineux qui balaie le bandeau en boucle. */
+.banniere-flash {
+  position: relative;
+  overflow: hidden;
+  animation: banniere-flash-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes banniere-flash-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+  }
+}
+
+.banniere-flash::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.45) 50%,
+    transparent 70%
+  );
+  transform: translateX(-120%);
+  animation: banniere-flash-shimmer 2.8s ease-in-out infinite;
+}
+
+@keyframes banniere-flash-shimmer {
+  0% {
+    transform: translateX(-120%);
+  }
+  55%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banniere-flash,
+  .banniere-flash::after {
+    animation: none;
+  }
+}

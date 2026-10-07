@@ -38,11 +38,11 @@ export default async function AccueilPage() {
       {(parametres?.fideliteActive ?? true) && (
         <Link
           href="/profil"
-          className="flex items-center justify-center gap-2 bg-gold px-4 py-2.5 text-center text-sm font-bold text-ink shadow-sm"
+          className="banniere-flash flex items-center justify-center gap-2 bg-red-600 px-4 py-3 text-center text-sm font-extrabold uppercase tracking-wide text-white shadow-lg"
         >
-          <span className="animate-pulse text-lg">🎁</span>
+          <span className="animate-bounce text-xl">🎁</span>
           Fidélité : {parametres?.seuilFidelite ?? 5} repas livrés = 1 repas offert !
-          <span>→</span>
+          <span className="animate-bounce text-xl">🎁</span>
         </Link>
       )}
 
