@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/guards";
+import { getSeuilFidelite } from "@/lib/fidelite";
 
 const LIMITE_PAR_DEFAUT = 20;
 
@@ -10,10 +11,13 @@ export async function GET(req: NextRequest) {
 
   const page = Math.max(1, Number(req.nextUrl.searchParams.get("page")) || 1);
   const limit = Math.max(1, Number(req.nextUrl.searchParams.get("limit")) || LIMITE_PAR_DEFAUT);
+  const corbeille = req.nextUrl.searchParams.get("corbeille") === "true";
+  const where = corbeille ? { supprimeLe: { not: null } } : { supprimeLe: null };
 
-  const [total, clients] = await Promise.all([
-    prisma.client.count(),
+  const [total, clients, seuilFidelite] = await Promise.all([
+    prisma.client.count({ where }),
     prisma.client.findMany({
+      where,
       include: {
         commandes: { select: { total: true, statut: true, createdAt: true } },
         fidelite: true,
@@ -22,6 +26,7 @@ export async function GET(req: NextRequest) {
       skip: (page - 1) * limit,
       take: limit,
     }),
+    getSeuilFidelite(),
   ]);
 
   const resultat = clients.map((c) => ({
@@ -36,7 +41,8 @@ export async function GET(req: NextRequest) {
     recompensesDisponibles: c.fidelite?.recompensesDisponibles ?? 0,
     fideliteActive: c.fideliteActive,
     derniereCommande: c.commandes[0]?.createdAt ?? null,
+    supprimeLe: c.supprimeLe,
   }));
 
-  return NextResponse.json({ clients: resultat, total, page, limit });
+  return NextResponse.json({ clients: resultat, total, page, limit, seuilFidelite });
 }

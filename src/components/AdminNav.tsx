@@ -12,6 +12,7 @@ const LIENS = [
   { href: "/admin/clients", label: "Clients", icone: "👥" },
   { href: "/admin/avis", label: "Avis", icone: "⭐" },
   { href: "/admin/statistiques", label: "Statistiques", icone: "📈" },
+  { href: "/admin/corbeille", label: "Corbeille", icone: "🗑️" },
   { href: "/admin/parametres", label: "Paramètres", icone: "⚙️" },
 ];
 

@@ -15,6 +15,7 @@ export default function AdminParametresPage() {
   const [telephone, setTelephone] = useState("");
   const [horaires, setHoraires] = useState("");
   const [fideliteActive, setFideliteActive] = useState(true);
+  const [seuilFidelite, setSeuilFidelite] = useState(5);
   const [logoUrl, setLogoUrl] = useState(LOGO_PAR_DEFAUT);
   const [bannerUrl, setBannerUrl] = useState(BANNER_PAR_DEFAUT);
   const [couleurPrimaire, setCouleurPrimaire] = useState(COULEUR_GOLD_PAR_DEFAUT);
@@ -31,6 +32,7 @@ export default function AdminParametresPage() {
         setTelephone(data.telephone);
         setHoraires(data.horaires);
         setFideliteActive(data.fideliteActive ?? true);
+        setSeuilFidelite(data.seuilFidelite ?? 5);
         setLogoUrl(data.logoUrl || LOGO_PAR_DEFAUT);
         setBannerUrl(data.bannerUrl || BANNER_PAR_DEFAUT);
         setCouleurPrimaire(data.couleurPrimaire || COULEUR_GOLD_PAR_DEFAUT);
@@ -53,6 +55,7 @@ export default function AdminParametresPage() {
         bannerUrl,
         couleurPrimaire,
         couleurSombre,
+        seuilFidelite,
       }),
     });
     setEnvoi(false);
@@ -183,6 +186,24 @@ export default function AdminParametresPage() {
         Tu peux aussi désactiver la fidélité pour un client précis depuis sa fiche dans{" "}
         <span className="font-semibold">Admin → Clients</span>.
       </p>
+
+      <label className="card block space-y-1 p-4">
+        <span className="font-semibold">🍽️ Seuil de fidélité</span>
+        <p className="text-sm text-ink/60">
+          Nombre de repas livrés nécessaires pour obtenir un repas offert.
+        </p>
+        <input
+          type="number"
+          min={1}
+          value={seuilFidelite}
+          onChange={(e) => setSeuilFidelite(Math.max(1, Number(e.target.value) || 1))}
+          className="mt-1 w-24 rounded-lg border border-black/10 px-3 py-2"
+        />
+        <span className="ml-2 text-sm text-ink/60">repas</span>
+        <p className="text-xs text-ink/50">
+          Enregistré avec le bouton ENREGISTRER plus haut.
+        </p>
+      </label>
 
       <ChangerMotDePasse />
     </div>

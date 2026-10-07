@@ -44,6 +44,9 @@ model Client {
   adresse        String?
   adressePrecision String?
   fideliteActive Boolean   @default(true)
+  // Mis à la corbeille (masqué des listes normales) sans être supprimé ;
+  // la suppression définitive est un acte séparé, protégé par mot de passe.
+  supprimeLe     DateTime?
   createdAt      DateTime  @default(now())
 
   commandes      Commande[]
@@ -71,7 +74,7 @@ model Plat {
 model Commande {
   id                String          @id @default(cuid())
   numero            Int             @unique
-  client            Client          @relation(fields: [clientId], references: [id])
+  client            Client          @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId          String
   total             Int
   fraisLivraison    Int             @default(0)
@@ -85,6 +88,9 @@ model Commande {
   codeSecours       String
   codeSecoursUtilise Boolean        @default(false)
   fideliteCreditee  Boolean         @default(false)
+  // Mise à la corbeille (masquée des listes admin) sans être supprimée ;
+  // la suppression définitive est un acte séparé, protégé par mot de passe.
+  supprimeLe        DateTime?
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @updatedAt
 
@@ -132,7 +138,7 @@ model Livraison {
 
 model Fidelite {
   id                  String   @id @default(cuid())
-  client              Client   @relation(fields: [clientId], references: [id])
+  client              Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId            String   @unique
   credits             Int      @default(0)
   recompensesDisponibles Int   @default(0)
@@ -141,9 +147,9 @@ model Fidelite {
 
 model Avis {
   id          String   @id @default(cuid())
-  client      Client   @relation(fields: [clientId], references: [id])
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String
-  commande    Commande @relation(fields: [commandeId], references: [id])
+  commande    Commande @relation(fields: [commandeId], references: [id], onDelete: Cascade)
   commandeId  String   @unique
   note        Int
   commentaire String?
@@ -153,7 +159,7 @@ model Avis {
 
 model Favori {
   id       String @id @default(cuid())
-  client   Client @relation(fields: [clientId], references: [id])
+  client   Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId String
   plat     Plat   @relation(fields: [platId], references: [id])
   platId   String
@@ -163,7 +169,7 @@ model Favori {
 
 model Notification {
   id        String   @id @default(cuid())
-  client    Client   @relation(fields: [clientId], references: [id])
+  client    Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId  String
   message   String
   lu        Boolean  @default(false)
@@ -178,6 +184,8 @@ model Parametres {
   telephone       String
   horaires        String
   fideliteActive  Boolean  @default(true)
+  // Nombre de repas livrés nécessaires pour obtenir un repas offert.
+  seuilFidelite   Int      @default(5)
   // Identité visuelle modifiable depuis l'admin, sans redéploiement.
   // Null = valeurs par défaut du code (logo/bannière d'origine, couleurs
   // or/bleu marine d'origine) — voir src/lib/branding.ts.

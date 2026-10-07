@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/guards";
 import { getClientCookie } from "@/lib/auth";
 import { notifier } from "@/lib/fidelite";
+import { verifierMotDePasseAdmin } from "@/lib/verifierMotDePasse";
 
 // Le client ne voit qu'un suivi simplifié : pas de notification pour
 // chaque étape interne (confirmée, en préparation, prête, en livraison),
@@ -42,7 +43,15 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   const guard = await requireRole("ADMIN");
   if ("error" in guard) return guard.error;
 
-  const { statut, fraisLivraison } = await req.json();
+  const { statut, fraisLivraison, supprimeLe } = await req.json();
+
+  if (supprimeLe !== undefined) {
+    const commande = await prisma.commande.update({
+      where: { id: params.id },
+      data: { supprimeLe: supprimeLe ? new Date() : null },
+    });
+    return NextResponse.json(commande);
+  }
 
   if (statut !== undefined) {
     if (!VALID_STATUTS.includes(statut)) {
@@ -97,4 +106,31 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   return NextResponse.json({ error: "Aucune modification fournie" }, { status: 400 });
+}
+
+// Suppression définitive (depuis la corbeille uniquement) : la commande doit
+// déjà être à la corbeille, et le mot de passe admin est revérifié pour
+// confirmer ce geste irréversible. Détails, paiement et livraison partent
+// avec elle (onDelete: Cascade sur le schéma).
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const guard = await requireRole("ADMIN");
+  if ("error" in guard) return guard.error;
+
+  const { motDePasse } = await req.json();
+  if (!motDePasse || !(await verifierMotDePasseAdmin(motDePasse))) {
+    return NextResponse.json({ error: "Mot de passe incorrect" }, { status: 401 });
+  }
+
+  const commande = await prisma.commande.findUnique({ where: { id: params.id } });
+  if (!commande) return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
+  if (!commande.supprimeLe) {
+    return NextResponse.json(
+      { error: "Cette commande doit d'abord être mise à la corbeille" },
+      { status: 400 }
+    );
+  }
+
+  await prisma.commande.delete({ where: { id: params.id } });
+
+  return NextResponse.json({ ok: true });
 }

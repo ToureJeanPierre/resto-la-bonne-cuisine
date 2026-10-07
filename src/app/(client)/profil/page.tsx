@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getClientCookie } from "@/lib/auth";
 import { formatFCFA } from "@/lib/format";
-import { SEUIL_FIDELITE } from "@/lib/fidelite";
+import { getSeuilFidelite } from "@/lib/fidelite";
 import ShareButton from "@/components/ShareButton";
 
 export const dynamic = "force-dynamic";
@@ -24,11 +24,12 @@ export default async function ProfilPage() {
     );
   }
 
-  const [donneesClient, fidelite, commandes, parametres] = await Promise.all([
+  const [donneesClient, fidelite, commandes, parametres, seuil] = await Promise.all([
     prisma.client.findUnique({ where: { id: client.id } }),
     prisma.fidelite.findUnique({ where: { clientId: client.id } }),
     prisma.commande.count({ where: { clientId: client.id } }),
     prisma.parametres.findUnique({ where: { id: "site" }, select: { fideliteActive: true } }),
+    getSeuilFidelite(),
   ]);
 
   const credits = fidelite?.credits ?? 0;
@@ -56,17 +57,17 @@ export default async function ProfilPage() {
         ) : (
           <>
             <p className="text-sm text-ink/60">
-              {credits}/{SEUIL_FIDELITE} repas livrés
+              {credits}/{seuil} repas livrés
             </p>
             <div className="h-2 w-full overflow-hidden rounded-full bg-black/10">
               <div
                 className="h-full bg-gold"
-                style={{ width: `${(credits / SEUIL_FIDELITE) * 100}%` }}
+                style={{ width: `${(credits / seuil) * 100}%` }}
               />
             </div>
           </>
         )}
-        <p className="text-xs text-ink/40">5 repas achetés et livrés = 1 repas offert</p>
+        <p className="text-xs text-ink/40">{seuil} repas achetés et livrés = 1 repas offert</p>
       </div>
       )}
 

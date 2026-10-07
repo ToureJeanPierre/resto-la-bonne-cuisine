@@ -22,6 +22,7 @@ export default function AdminClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
+  const [seuilFidelite, setSeuilFidelite] = useState(5);
   const [chargement, setChargement] = useState(true);
   const [enEdition, setEnEdition] = useState<string | null>(null);
 
@@ -32,6 +33,7 @@ export default function AdminClientsPage() {
       .then((data) => {
         setClients(data.clients);
         setTotal(data.total);
+        setSeuilFidelite(data.seuilFidelite ?? 5);
       })
       .finally(() => setChargement(false));
   }
@@ -60,6 +62,16 @@ export default function AdminClientsPage() {
     charger();
   }
 
+  async function mettreALaCorbeille(clientId: string) {
+    if (!confirm("Mettre ce client à la corbeille ?")) return;
+    await fetch(`/api/clients/${clientId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ supprimeLe: true }),
+    });
+    charger();
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold">Clients</h1>
@@ -83,7 +95,9 @@ export default function AdminClientsPage() {
                 🎁 Récompense disponible ({c.recompensesDisponibles})
               </p>
             ) : (
-              <p className="text-sm text-ink/60">Repas validés : {c.credits}/5</p>
+              <p className="text-sm text-ink/60">
+                Repas validés : {c.credits}/{seuilFidelite}
+              </p>
             )}
 
             {enEdition === c.id ? (
@@ -108,6 +122,12 @@ export default function AdminClientsPage() {
                   }`}
                 >
                   {c.fideliteActive ? "Désactiver la fidélité" : "Réactiver la fidélité"}
+                </button>
+                <button
+                  onClick={() => mettreALaCorbeille(c.id)}
+                  className="text-xs font-semibold text-red-600"
+                >
+                  🗑️ Corbeille
                 </button>
               </div>
             )}

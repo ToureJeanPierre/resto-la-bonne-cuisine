@@ -169,7 +169,28 @@ export async function GET(req: NextRequest) {
 
     const page = Math.max(1, Number(req.nextUrl.searchParams.get("page")) || 1);
     const limit = Math.max(1, Number(req.nextUrl.searchParams.get("limit")) || LIMITE_PAR_DEFAUT);
-    const where = statut ? { statut: statut as any } : undefined;
+    const corbeille = req.nextUrl.searchParams.get("corbeille") === "true";
+    const date = req.nextUrl.searchParams.get("date"); // YYYY-MM-DD : un jour précis
+    const mois = req.nextUrl.searchParams.get("mois"); // YYYY-MM : un mois entier
+
+    let createdAt: { gte: Date; lt: Date } | undefined;
+    if (date) {
+      const debut = new Date(`${date}T00:00:00`);
+      const fin = new Date(debut);
+      fin.setDate(fin.getDate() + 1);
+      createdAt = { gte: debut, lt: fin };
+    } else if (mois) {
+      const debut = new Date(`${mois}-01T00:00:00`);
+      const fin = new Date(debut);
+      fin.setMonth(fin.getMonth() + 1);
+      createdAt = { gte: debut, lt: fin };
+    }
+
+    const where = {
+      supprimeLe: corbeille ? { not: null } : null,
+      ...(statut && { statut: statut as any }),
+      ...(createdAt && { createdAt }),
+    };
 
     const [total, commandes] = await Promise.all([
       prisma.commande.count({ where }),
@@ -188,7 +209,7 @@ export async function GET(req: NextRequest) {
   if (!client) return NextResponse.json([]);
 
   const commandes = await prisma.commande.findMany({
-    where: { clientId: client.id },
+    where: { clientId: client.id, supprimeLe: null },
     include: { details: true, paiement: true, livraison: true, avis: true },
     orderBy: { createdAt: "desc" },
   });

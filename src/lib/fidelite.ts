@@ -1,6 +1,14 @@
 import { prisma } from "@/lib/prisma";
 
-export const SEUIL_FIDELITE = 5;
+export const SEUIL_FIDELITE_PAR_DEFAUT = 5;
+
+export async function getSeuilFidelite(): Promise<number> {
+  const parametres = await prisma.parametres.findUnique({
+    where: { id: "site" },
+    select: { seuilFidelite: true },
+  });
+  return parametres?.seuilFidelite || SEUIL_FIDELITE_PAR_DEFAUT;
+}
 
 // Le programme de fidélité peut être désactivé globalement (Paramètres)
 // ou pour un client précis (fiche client) — dans ce cas, aucun crédit
@@ -21,15 +29,17 @@ export async function fideliteEstActive(clientId: string): Promise<boolean> {
 export async function crediterFidelite(clientId: string) {
   if (!(await fideliteEstActive(clientId))) return null;
 
+  const seuil = await getSeuilFidelite();
+
   const fidelite = await prisma.fidelite.upsert({
     where: { clientId },
     create: { clientId, credits: 1 },
     update: { credits: { increment: 1 } },
   });
 
-  if (fidelite.credits >= SEUIL_FIDELITE) {
-    const recompenses = Math.floor(fidelite.credits / SEUIL_FIDELITE);
-    const resteCredits = fidelite.credits % SEUIL_FIDELITE;
+  if (fidelite.credits >= seuil) {
+    const recompenses = Math.floor(fidelite.credits / seuil);
+    const resteCredits = fidelite.credits % seuil;
     return prisma.fidelite.update({
       where: { clientId },
       data: {

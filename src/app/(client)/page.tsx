@@ -35,6 +35,17 @@ export default async function AccueilPage() {
         />
       </div>
 
+      {(parametres?.fideliteActive ?? true) && (
+        <Link
+          href="/profil"
+          className="flex items-center justify-center gap-2 bg-gold px-4 py-2.5 text-center text-sm font-bold text-ink shadow-sm"
+        >
+          <span className="animate-pulse text-lg">🎁</span>
+          Fidélité : {parametres?.seuilFidelite ?? 5} repas livrés = 1 repas offert !
+          <span>→</span>
+        </Link>
+      )}
+
       <div className="space-y-6 p-4">
         <div>
           <h1 className="font-display text-2xl font-bold">Bonjour 👋</h1>

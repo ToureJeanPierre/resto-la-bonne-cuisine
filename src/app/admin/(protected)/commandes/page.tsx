@@ -29,17 +29,25 @@ const FILTRES: { label: string; valeur: StatutCommande | "TOUTES" }[] = [
   { label: "Annulées", valeur: "ANNULEE" },
 ];
 
+const AUJOURDHUI = new Date().toISOString().slice(0, 10);
+const MOIS_COURANT = AUJOURDHUI.slice(0, 7);
+
 export default function AdminCommandesPage() {
   const [commandes, setCommandes] = useState<Commande[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [filtre, setFiltre] = useState<StatutCommande | "TOUTES">("TOUTES");
+  const [periode, setPeriode] = useState<"toutes" | "jour" | "mois">("toutes");
+  const [date, setDate] = useState(AUJOURDHUI);
+  const [mois, setMois] = useState(MOIS_COURANT);
   const [chargement, setChargement] = useState(true);
 
   function charger() {
     setChargement(true);
     const params = new URLSearchParams({ scope: "admin", page: String(page), limit: String(LIMITE) });
     if (filtre !== "TOUTES") params.set("statut", filtre);
+    if (periode === "jour") params.set("date", date);
+    if (periode === "mois") params.set("mois", mois);
     fetch(`/api/commandes?${params}`)
       .then((r) => r.json())
       .then((data) => {
@@ -52,7 +60,7 @@ export default function AdminCommandesPage() {
   useEffect(() => {
     charger();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filtre, page]);
+  }, [filtre, page, periode, date, mois]);
 
   async function changerStatut(id: string, statut: string) {
     await fetch(`/api/commandes/${id}`, {
@@ -68,6 +76,16 @@ export default function AdminCommandesPage() {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ fraisLivraison }),
+    });
+    charger();
+  }
+
+  async function mettreALaCorbeille(id: string) {
+    if (!confirm("Mettre cette commande à la corbeille ?")) return;
+    await fetch(`/api/commandes/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ supprimeLe: true }),
     });
     charger();
   }
@@ -93,6 +111,51 @@ export default function AdminCommandesPage() {
         ))}
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        {(
+          [
+            { label: "Toutes dates", valeur: "toutes" },
+            { label: "Un jour", valeur: "jour" },
+            { label: "Un mois", valeur: "mois" },
+          ] as const
+        ).map((p) => (
+          <button
+            key={p.valeur}
+            onClick={() => {
+              setPeriode(p.valeur);
+              setPage(1);
+            }}
+            className={`flex-shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${
+              periode === p.valeur ? "bg-ink text-white" : "bg-black/5 text-ink/60"
+            }`}
+          >
+            {p.label}
+          </button>
+        ))}
+        {periode === "jour" && (
+          <input
+            type="date"
+            value={date}
+            onChange={(e) => {
+              setDate(e.target.value);
+              setPage(1);
+            }}
+            className="rounded-lg border border-black/10 px-2 py-1 text-sm"
+          />
+        )}
+        {periode === "mois" && (
+          <input
+            type="month"
+            value={mois}
+            onChange={(e) => {
+              setMois(e.target.value);
+              setPage(1);
+            }}
+            className="rounded-lg border border-black/10 px-2 py-1 text-sm"
+          />
+        )}
+      </div>
+
       {chargement && <p className="text-ink/60">Chargement...</p>}
 
       <div className="space-y-3">
@@ -104,6 +167,15 @@ export default function AdminCommandesPage() {
                   #{c.numero} — {c.client.nom}
                 </p>
                 <p className="text-xs text-ink/50">{c.client.telephone}</p>
+                <p className="text-xs text-ink/50">
+                  {new Date(c.createdAt).toLocaleString("fr-FR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
               </div>
               <p className="font-bold text-gold-dark">{formatFCFA(c.total)}</p>
             </div>
@@ -133,6 +205,12 @@ export default function AdminCommandesPage() {
                 ))}
               </select>
             </div>
+            <button
+              onClick={() => mettreALaCorbeille(c.id)}
+              className="text-xs font-semibold text-red-600"
+            >
+              🗑️ Mettre à la corbeille
+            </button>
           </div>
         ))}
         {!chargement && commandes.length === 0 && (
