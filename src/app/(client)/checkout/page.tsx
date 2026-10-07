@@ -92,13 +92,19 @@ export default function CheckoutPage() {
     <div className="space-y-5 p-4">
       <h1 className="font-display text-2xl font-bold">Valider ma commande</h1>
 
-      <div className="card space-y-3 p-4">
+      <div className="space-y-3 rounded-2xl bg-gold/10 p-4 shadow-sm ring-1 ring-gold/25">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold text-base">
+            👤
+          </span>
+          <p className="font-display text-base font-bold">Vos coordonnées</p>
+        </div>
         <label className="block">
           <span className="text-sm font-medium text-ink/70">Nom</span>
           <input
             value={nom}
             onChange={(e) => setNom(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-gold/30 bg-white px-3 py-2"
             placeholder="Votre nom"
           />
         </label>
@@ -107,28 +113,40 @@ export default function CheckoutPage() {
           <input
             value={telephone}
             onChange={(e) => setTelephone(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2"
+            className="mt-1 w-full rounded-lg border border-gold/30 bg-white px-3 py-2"
             placeholder="07 00 00 00 00"
             type="tel"
           />
         </label>
       </div>
 
-      <div className="card space-y-3 p-4">
-        <p className="text-sm font-medium text-ink/70">Mode de livraison</p>
+      <div className="space-y-3 rounded-2xl bg-gold/10 p-4 shadow-sm ring-1 ring-gold/25">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold text-base">
+            🚚
+          </span>
+          <p className="font-display text-base font-bold">Comment récupérer votre commande ?</p>
+        </div>
         <div className="flex gap-2">
           {(["LIVRAISON", "RETRAIT"] as const).map((mode) => (
             <button
               key={mode}
               onClick={() => setModeLivraison(mode)}
-              className={`flex-1 rounded-full py-2 text-sm font-semibold ${
-                modeLivraison === mode ? "bg-gold text-ink" : "bg-black/5 text-ink/60"
+              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition ${
+                modeLivraison === mode
+                  ? "bg-gold text-ink shadow"
+                  : "bg-white text-ink/60 ring-1 ring-gold/20"
               }`}
             >
-              {mode === "LIVRAISON" ? "Livraison" : "Retrait"}
+              {mode === "LIVRAISON" ? "🛵 Livraison" : "🏠 Retrait sur place"}
             </button>
           ))}
         </div>
+        <p className="text-sm text-ink/60">
+          {modeLivraison === "LIVRAISON"
+            ? "On vous apporte votre commande à l'adresse que vous indiquez ci-dessous."
+            : "Vous venez chercher votre commande directement au restaurant — pas de frais de livraison."}
+        </p>
 
         {modeLivraison === "LIVRAISON" && (
           <>
@@ -137,7 +155,7 @@ export default function CheckoutPage() {
               <input
                 value={adresseLivraison}
                 onChange={(e) => setAdresseLivraison(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2"
+                className="mt-1 w-full rounded-lg border border-gold/30 bg-white px-3 py-2"
                 placeholder="Quartier, rue..."
               />
             </label>
@@ -146,7 +164,7 @@ export default function CheckoutPage() {
               <input
                 value={precisionAdresse}
                 onChange={(e) => setPrecisionAdresse(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-black/10 px-3 py-2"
+                className="mt-1 w-full rounded-lg border border-gold/30 bg-white px-3 py-2"
                 placeholder="Étage, repère..."
               />
             </label>
@@ -154,8 +172,13 @@ export default function CheckoutPage() {
         )}
       </div>
 
-      <div className="card space-y-2 p-4">
-        <p className="text-sm font-medium text-ink/70">Mode de paiement</p>
+      <div className="space-y-2 rounded-2xl bg-gold/10 p-4 shadow-sm ring-1 ring-gold/25">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gold text-base">
+            💳
+          </span>
+          <p className="font-display text-base font-bold">Mode de paiement</p>
+        </div>
         {MOYENS_PAIEMENT.filter((m) => m !== "TEST").map((moyen) => {
           const disponible = moyen === "A_LA_LIVRAISON";
           return (
@@ -165,8 +188,8 @@ export default function CheckoutPage() {
                 !disponible
                   ? "border-black/5 bg-black/5 text-ink/30"
                   : moyenPaiement === moyen
-                    ? "border-gold bg-gold/10"
-                    : "border-black/10"
+                    ? "border-gold bg-white"
+                    : "border-gold/20 bg-white"
               }`}
             >
               <span className="flex items-center gap-2">
@@ -186,7 +209,7 @@ export default function CheckoutPage() {
       </div>
 
       {recompensesDisponibles > 0 && (
-        <label className="card flex items-center gap-2 p-4">
+        <label className="flex items-center gap-2 rounded-2xl bg-green-50 p-4 shadow-sm ring-1 ring-green-200">
           <input
             type="checkbox"
             checked={utiliserRecompense}
@@ -196,7 +219,7 @@ export default function CheckoutPage() {
         </label>
       )}
 
-      <div className="card space-y-2 p-4">
+      <div className="space-y-2 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-gold/25">
         <div className="flex justify-between text-ink/70">
           <span>Sous-total</span>
           <span>{formatFCFA(sousTotal)}</span>
@@ -207,7 +230,7 @@ export default function CheckoutPage() {
             <span>-{formatFCFA(remise)}</span>
           </div>
         )}
-        <div className="flex justify-between border-t border-black/10 pt-2 text-lg font-bold">
+        <div className="flex justify-between border-t border-gold/20 pt-2 text-lg font-bold text-gold-dark">
           <span>TOTAL</span>
           <span>{formatFCFA(total)}</span>
         </div>
