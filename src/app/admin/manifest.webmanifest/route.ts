@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import {
   getParametresBranding,
-  LOGO_PAR_DEFAUT,
+  LOGO_ADMIN,
   COULEUR_INK_PAR_DEFAUT,
   typeImageDepuisUrl,
 } from "@/lib/branding";
 
 // Manifest PWA dédié à l'espace admin : installée séparément de
-// l'application cliente, avec son propre nom et un démarrage direct sur
-// /admin au lieu de la page d'accueil du restaurant.
+// l'application cliente, avec son propre nom, son propre logo et un
+// démarrage direct sur /admin au lieu de la page d'accueil du restaurant.
 export async function GET() {
   const parametres = await getParametresBranding();
-  const logo = parametres?.logoUrl || LOGO_PAR_DEFAUT;
+  const logo = LOGO_ADMIN;
 
   const manifest = {
     name: "Admin — Restaurant L'Avocatier",

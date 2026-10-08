@@ -1,20 +1,18 @@
 import type { Metadata } from "next";
-import { getParametresBranding, LOGO_PAR_DEFAUT } from "@/lib/branding";
+import { LOGO_ADMIN } from "@/lib/branding";
 import ManifestAdmin from "@/components/ManifestAdmin";
 
 // Englobe /admin/login ET /admin/(protected)/* : une identité PWA distincte
 // de l'application cliente, pour que "installer" depuis l'espace admin
-// pose une icône séparée qui s'ouvre directement sur /admin.
+// pose une icône séparée (logo propre à l'admin) qui s'ouvre directement
+// sur /admin.
 export async function generateMetadata(): Promise<Metadata> {
-  const parametres = await getParametresBranding();
-  const logo = parametres?.logoUrl || LOGO_PAR_DEFAUT;
-
   return {
     title: "Admin — Restaurant L'Avocatier",
     manifest: "/admin/manifest.webmanifest",
     icons: {
-      icon: logo,
-      apple: logo,
+      icon: LOGO_ADMIN,
+      apple: LOGO_ADMIN,
     },
     appleWebApp: {
       capable: true,
