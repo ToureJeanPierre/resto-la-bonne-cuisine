@@ -18,7 +18,11 @@ export async function generateMetadata(): Promise<Metadata> {
     title: "Restaurant L'Avocatier",
     description:
       "Saveurs d'Afrique, plaisir de partager — commandez le menu du jour et faites-vous livrer.",
-    manifest: "/manifest.webmanifest",
+    // Le manifest n'est volontairement PAS défini ici : chaque section
+    // (client, admin) fixe le sien dans son propre layout. Next.js ne
+    // laisse pas un layout imbriqué écraser un "manifest" déjà fixé par
+    // un ancêtre, donc le définir au niveau racine empêcherait l'admin
+    // d'avoir sa propre identité PWA installable.
     icons: {
       icon: logo,
       apple: logo,

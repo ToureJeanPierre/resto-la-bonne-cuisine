@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { LOGO_ADMIN } from "@/lib/branding";
-import ManifestAdmin from "@/components/ManifestAdmin";
 
 // Englobe /admin/login ET /admin/(protected)/* : une identité PWA distincte
 // de l'application cliente, pour que "installer" depuis l'espace admin
@@ -23,10 +22,5 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      <ManifestAdmin />
-      {children}
-    </>
-  );
+  return children;
 }

@@ -18,6 +18,7 @@ export async function GET() {
     short_name: "Admin Avocatier",
     description: "Gestion des commandes, du menu et des livraisons du restaurant.",
     start_url: "/admin",
+    scope: "/admin",
     display: "standalone",
     background_color: "#faf8f4",
     theme_color: parametres?.couleurSombre || COULEUR_INK_PAR_DEFAUT,

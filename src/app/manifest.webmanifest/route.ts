@@ -1,4 +1,4 @@
-import { MetadataRoute } from "next";
+import { NextResponse } from "next/server";
 import {
   getParametresBranding,
   LOGO_PAR_DEFAUT,
@@ -6,16 +6,23 @@ import {
   typeImageDepuisUrl,
 } from "@/lib/branding";
 
-export default async function manifest(): Promise<MetadataRoute.Manifest> {
+// Route explicite plutôt que la convention de fichier app/manifest.ts :
+// cette dernière s'impose globalement dans Next.js et ignore le champ
+// "manifest" fixé par les layouts de section (client, admin), ce qui
+// empêchait l'admin d'avoir son propre manifest installable. Une route
+// normale n'a pas ce problème — chaque section référence la sienne
+// explicitement dans son layout.
+export async function GET() {
   const parametres = await getParametresBranding();
   const logo = parametres?.logoUrl || LOGO_PAR_DEFAUT;
 
-  return {
+  const manifest = {
     name: "Restaurant L'Avocatier",
     short_name: "L'Avocatier",
     description:
       "Saveurs d'Afrique, plaisir de partager — commandez le menu du jour et faites-vous livrer.",
     start_url: "/",
+    scope: "/",
     display: "standalone",
     background_color: "#faf8f4",
     theme_color: parametres?.couleurSombre || COULEUR_INK_PAR_DEFAUT,
@@ -28,4 +35,8 @@ export default async function manifest(): Promise<MetadataRoute.Manifest> {
       },
     ],
   };
+
+  return NextResponse.json(manifest, {
+    headers: { "Content-Type": "application/manifest+json" },
+  });
 }
