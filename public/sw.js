@@ -1,5 +1,5 @@
-const CACHE_NAME = "lbc-shell-v1";
-const SHELL_URLS = ["/", "/menu", "/images/logo.webp", "/manifest.json"];
+const CACHE_NAME = "lbc-shell-v2";
+const SHELL_URLS = ["/", "/menu", "/images/logo.webp"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
