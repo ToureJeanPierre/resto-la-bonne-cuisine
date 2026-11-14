@@ -2,11 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { createStaffSession } from "@/lib/auth";
+import { ipDeLaRequete, limiteDepassee } from "@/lib/rate-limit";
 
 const MAX_TENTATIVES = 5;
 const DUREE_VERROU_MINUTES = 15;
 
 export async function POST(req: NextRequest) {
+  // Verrou par compte en base (plus bas) + limite par IP ici : empêche
+  // qu'une même IP teste beaucoup de numéros de téléphone différents pour
+  // contourner le verrou compte par compte.
+  if (limiteDepassee(`login:${ipDeLaRequete(req)}`, 20, 10 * 60_000)) {
+    return NextResponse.json(
+      { error: "Trop de tentatives de connexion. Réessayez plus tard." },
+      { status: 429 }
+    );
+  }
+
   const { telephone, motDePasse } = await req.json();
 
   if (!telephone || !motDePasse) {

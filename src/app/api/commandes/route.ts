@@ -6,10 +6,30 @@ import { getClientCookie, setClientCookie } from "@/lib/auth";
 import { getPaymentProvider, MoyenPaiement } from "@/lib/payment";
 import { genererCodeSecours } from "@/lib/format";
 import { notifier } from "@/lib/fidelite";
+import { MOYENS_PAIEMENT_PUBLICS } from "@/lib/constants";
+import { ipDeLaRequete, limiteDepassee } from "@/lib/rate-limit";
 
 type PanierItem = { platId: string; quantite: number };
 
+const MODES_LIVRAISON = ["LIVRAISON", "RETRAIT"] as const;
+const QUANTITE_MAX_PAR_LIGNE = 50;
+const LIGNES_MAX_PAR_COMMANDE = 30;
+
+// Route publique, sans authentification : c'est la cible la plus probable
+// d'un spam de commandes. 10 commandes / 10 min par IP est largement
+// suffisant pour un usage normal (même plusieurs clients derrière la même
+// box internet) tout en freinant un script.
+const MAX_COMMANDES_PAR_FENETRE = 10;
+const FENETRE_COMMANDES_MS = 10 * 60_000;
+
 export async function POST(req: NextRequest) {
+  if (limiteDepassee(`commande:${ipDeLaRequete(req)}`, MAX_COMMANDES_PAR_FENETRE, FENETRE_COMMANDES_MS)) {
+    return NextResponse.json(
+      { error: "Trop de commandes envoyées. Réessayez dans quelques minutes." },
+      { status: 429 }
+    );
+  }
+
   const body = await req.json();
   const {
     nom,
@@ -33,6 +53,32 @@ export async function POST(req: NextRequest) {
 
   if (!nom || !telephone || !items?.length || !modeLivraison || !moyenPaiement) {
     return NextResponse.json({ error: "Informations de commande incomplètes" }, { status: 400 });
+  }
+
+  if (typeof nom !== "string" || nom.trim().length === 0 || nom.length > 100) {
+    return NextResponse.json({ error: "Nom invalide" }, { status: 400 });
+  }
+  if (typeof telephone !== "string" || !/^[0-9+\s]{6,20}$/.test(telephone.trim())) {
+    return NextResponse.json({ error: "Numéro de téléphone invalide" }, { status: 400 });
+  }
+  if (!MODES_LIVRAISON.includes(modeLivraison)) {
+    return NextResponse.json({ error: "Mode de livraison invalide" }, { status: 400 });
+  }
+  if (!(MOYENS_PAIEMENT_PUBLICS as readonly string[]).includes(moyenPaiement)) {
+    return NextResponse.json({ error: "Moyen de paiement invalide" }, { status: 400 });
+  }
+  if (items.length > LIGNES_MAX_PAR_COMMANDE) {
+    return NextResponse.json({ error: "Trop d'articles dans la commande" }, { status: 400 });
+  }
+  for (const item of items) {
+    if (
+      !item.platId ||
+      !Number.isInteger(item.quantite) ||
+      item.quantite < 1 ||
+      item.quantite > QUANTITE_MAX_PAR_LIGNE
+    ) {
+      return NextResponse.json({ error: "Quantité invalide" }, { status: 400 });
+    }
   }
 
   if (modeLivraison === "LIVRAISON" && !adresseLivraison) {
@@ -152,7 +198,7 @@ export async function POST(req: NextRequest) {
 
   await notifier(client.id, `Commande #${commande.numero} reçue. Merci !`);
 
-  setClientCookie({ id: client.id, nom: client.nom, telephone: client.telephone });
+  await setClientCookie({ id: client.id, nom: client.nom, telephone: client.telephone });
 
   return NextResponse.json(commande, { status: 201 });
 }
@@ -205,7 +251,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ commandes, total, page, limit });
   }
 
-  const client = getClientCookie();
+  const client = await getClientCookie();
   if (!client) return NextResponse.json([]);
 
   const commandes = await prisma.commande.findMany({

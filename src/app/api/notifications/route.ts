@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getClientCookie } from "@/lib/auth";
 
 export async function GET() {
-  const client = getClientCookie();
+  const client = await getClientCookie();
   if (!client) return NextResponse.json([]);
 
   const notifications = await prisma.notification.findMany({
@@ -16,7 +16,7 @@ export async function GET() {
 }
 
 export async function POST() {
-  const client = getClientCookie();
+  const client = await getClientCookie();
   if (!client) return NextResponse.json({ ok: true });
 
   await prisma.notification.updateMany({

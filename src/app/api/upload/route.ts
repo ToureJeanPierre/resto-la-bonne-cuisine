@@ -15,8 +15,10 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Aucune photo reçue." }, { status: 400 });
   }
 
-  if (!fichier.type.startsWith("image/")) {
-    return NextResponse.json({ error: "Le fichier doit être une image." }, { status: 400 });
+  // SVG exclu volontairement : un SVG peut contenir du JavaScript intégré
+  // (balise <script>), contrairement aux formats matriciels (jpg/png/webp...).
+  if (!fichier.type.startsWith("image/") || fichier.type === "image/svg+xml") {
+    return NextResponse.json({ error: "Le fichier doit être une image (JPG, PNG, WebP...)." }, { status: 400 });
   }
 
   if (fichier.size > TAILLE_MAX) {

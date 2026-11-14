@@ -7,7 +7,7 @@ import { statutClientSimplifie, StatutCommande } from "@/lib/constants";
 export const dynamic = "force-dynamic";
 
 export default async function MesCommandesPage() {
-  const client = getClientCookie();
+  const client = await getClientCookie();
 
   if (!client) {
     return (

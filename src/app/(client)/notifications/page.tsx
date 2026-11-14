@@ -5,7 +5,7 @@ import MarquerLues from "@/components/MarquerLues";
 export const dynamic = "force-dynamic";
 
 export default async function NotificationsPage() {
-  const client = getClientCookie();
+  const client = await getClientCookie();
   if (!client) {
     return <p className="p-8 text-center text-ink/60">Aucune notification pour le moment.</p>;
   }

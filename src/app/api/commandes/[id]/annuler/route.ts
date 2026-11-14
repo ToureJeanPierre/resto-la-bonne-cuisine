@@ -9,7 +9,7 @@ export async function POST(_req: NextRequest, { params }: { params: { id: string
   const commande = await prisma.commande.findUnique({ where: { id: params.id } });
   if (!commande) return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
 
-  const client = getClientCookie();
+  const client = await getClientCookie();
   const staff = await getStaffSession();
   const estProprietaire = client && client.id === commande.clientId;
 

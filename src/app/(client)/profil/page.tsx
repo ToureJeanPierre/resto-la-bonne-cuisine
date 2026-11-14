@@ -8,7 +8,7 @@ import ShareButton from "@/components/ShareButton";
 export const dynamic = "force-dynamic";
 
 export default async function ProfilPage() {
-  const client = getClientCookie();
+  const client = await getClientCookie();
 
   if (!client) {
     return (

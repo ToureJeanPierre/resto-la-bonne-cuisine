@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getClientCookie } from "@/lib/auth";
 
 export async function GET() {
-  const client = getClientCookie();
+  const client = await getClientCookie();
   if (!client) return NextResponse.json(null);
 
   const donnees = await prisma.client.findUnique({

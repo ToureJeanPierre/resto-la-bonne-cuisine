@@ -2,9 +2,20 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 import { prisma } from "@/lib/prisma";
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? "dev-secret-change-in-production-please"
-);
+// Pas de repli silencieux sur un secret public connu de tous (visible dans
+// l'historique Git) : sans JWT_SECRET, on lève une erreur explicite au
+// moment de signer/vérifier une session plutôt que de signer avec une
+// valeur que n'importe qui peut lire sur GitHub et s'en servir pour
+// fabriquer un faux jeton admin.
+function getSecret(): Uint8Array {
+  const valeur = process.env.JWT_SECRET;
+  if (!valeur) {
+    throw new Error(
+      "JWT_SECRET n'est pas défini. Ajoute cette variable d'environnement (une longue chaîne aléatoire) avant de pouvoir se connecter."
+    );
+  }
+  return new TextEncoder().encode(valeur);
+}
 
 export type SessionPayload = {
   sub: string;
@@ -21,7 +32,7 @@ export async function createStaffSession(payload: SessionPayload) {
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("30d")
-    .sign(secret);
+    .sign(getSecret());
 
   cookies().set(STAFF_COOKIE, token, {
     httpOnly: true,
@@ -36,7 +47,7 @@ export async function getStaffSession(): Promise<SessionPayload | null> {
   const token = cookies().get(STAFF_COOKIE)?.value;
   if (!token) return null;
   try {
-    const { payload } = await jwtVerify(token, secret);
+    const { payload } = await jwtVerify(token, getSecret());
     const session = payload as unknown as SessionPayload;
 
     // Revérifié à chaque requête (pas seulement à la connexion) : un compte
@@ -62,9 +73,19 @@ export function clearStaffSession() {
 
 export type ClientIdentity = { id: string; nom: string; telephone: string };
 
-export function setClientCookie(client: ClientIdentity) {
-  cookies().set(CLIENT_COOKIE, JSON.stringify(client), {
-    httpOnly: false,
+// Signé (comme la session staff) plutôt que du JSON brut : un client ne
+// peut plus modifier son propre cookie (via les outils de développement du
+// navigateur) pour se faire passer pour un autre et lire ses commandes,
+// son adresse ou son historique de fidélité.
+export async function setClientCookie(client: ClientIdentity) {
+  const token = await new SignJWT({ ...client })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("365d")
+    .sign(getSecret());
+
+  cookies().set(CLIENT_COOKIE, token, {
+    httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
     path: "/",
@@ -72,11 +93,12 @@ export function setClientCookie(client: ClientIdentity) {
   });
 }
 
-export function getClientCookie(): ClientIdentity | null {
-  const raw = cookies().get(CLIENT_COOKIE)?.value;
-  if (!raw) return null;
+export async function getClientCookie(): Promise<ClientIdentity | null> {
+  const token = cookies().get(CLIENT_COOKIE)?.value;
+  if (!token) return null;
   try {
-    return JSON.parse(raw);
+    const { payload } = await jwtVerify(token, getSecret());
+    return payload as unknown as ClientIdentity;
   } catch {
     return null;
   }

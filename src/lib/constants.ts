@@ -40,6 +40,10 @@ export function statutClientSimplifie(statut: StatutCommande): { icone: string; 
 export const MOYENS_PAIEMENT = ["WAVE", "ORANGE_MONEY", "A_LA_LIVRAISON", "TEST"] as const;
 export type MoyenPaiementType = (typeof MOYENS_PAIEMENT)[number];
 
+// "TEST" simule un paiement confirmé sans aucune vérification : jamais une
+// valeur qu'un client est autorisé à choisir lui-même en passant commande.
+export const MOYENS_PAIEMENT_PUBLICS = MOYENS_PAIEMENT.filter((m) => m !== "TEST");
+
 export const LABELS_MOYEN_PAIEMENT: Record<MoyenPaiementType, string> = {
   WAVE: "Wave",
   ORANGE_MONEY: "Orange Money",

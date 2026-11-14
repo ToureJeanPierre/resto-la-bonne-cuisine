@@ -20,7 +20,7 @@ export default async function CommandeDetailPage({ params }: { params: { id: str
   });
   if (!commande) notFound();
 
-  const client = getClientCookie();
+  const client = await getClientCookie();
   if (!client || client.id !== commande.clientId) {
     return <p className="p-8 text-center text-ink/60">Commande introuvable.</p>;
   }

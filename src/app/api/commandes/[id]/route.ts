@@ -20,7 +20,7 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   });
   if (!commande) return NextResponse.json({ error: "Commande introuvable" }, { status: 404 });
 
-  const client = getClientCookie();
+  const client = await getClientCookie();
   const staff = await import("@/lib/auth").then((m) => m.getStaffSession());
   if (!staff && (!client || client.id !== commande.clientId)) {
     return NextResponse.json({ error: "Non autorisé" }, { status: 403 });
